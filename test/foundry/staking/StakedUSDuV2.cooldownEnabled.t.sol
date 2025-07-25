@@ -1,0 +1,581 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8;
+
+/* solhint-disable func-name-mixedcase  */
+
+import {console} from "forge-std/console.sol";
+import "forge-std/Test.sol";
+import {SigUtils} from "forge-std/SigUtils.sol";
+
+import "../../../contracts/USDu.sol";
+import "../../../contracts/StakedUSDuV2.sol";
+import "../../../contracts/interfaces/IUSDu.sol";
+import "../../../contracts/interfaces/IStakedUSDuCooldown.sol";
+import "../../../contracts/interfaces/IERC20Events.sol";
+
+contract StakedUSDuV2CooldownTest is Test, IERC20Events {
+  USDu public usduToken;
+  StakedUSDuV2 public stakedUSDu;
+  SigUtils public sigUtilsUSDu;
+  SigUtils public sigUtilsStakedUSDu;
+
+  address public owner;
+  address public rewarder;
+  address public alice;
+  address public bob;
+  address public greg;
+
+  bytes32 REWARDER_ROLE = keccak256("REWARDER_ROLE");
+
+  event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
+  event Withdraw(
+    address indexed caller, address indexed receiver, address indexed owner, uint256 assets, uint256 shares
+  );
+  event RewardsReceived(uint256 indexed amount, uint256 newVestingUSDuAmount);
+
+  event CooldownDurationUpdated(uint24 previousDuration, uint24 newDuration);
+
+  function setUp() public virtual {
+    usduToken = new USDu(address(this));
+
+    alice = vm.addr(0xB44DE);
+    bob = vm.addr(0x1DE);
+    greg = vm.addr(0x6ED);
+    owner = vm.addr(0xA11CE);
+    rewarder = vm.addr(0x1DEA);
+    vm.label(alice, "alice");
+    vm.label(bob, "bob");
+    vm.label(greg, "greg");
+    vm.label(owner, "owner");
+    vm.label(rewarder, "rewarder");
+
+    vm.prank(owner);
+    stakedUSDu = new StakedUSDuV2(IUSDu(address(usduToken)), rewarder, owner);
+
+    sigUtilsUSDu = new SigUtils(usduToken.DOMAIN_SEPARATOR());
+    sigUtilsStakedUSDu = new SigUtils(stakedUSDu.DOMAIN_SEPARATOR());
+
+    usduToken.setMinter(address(this));
+  }
+
+  function test_constructor() public {
+    vm.prank(owner);
+
+    StakedUSDuV2 stakingContract = new StakedUSDuV2(IUSDu(address(usduToken)), rewarder, owner);
+    assertEq(stakingContract.owner(), owner);
+    assertEq(stakingContract.cooldownDuration(), 90 days);
+    assertTrue(address(stakingContract.silo()) != address(0));
+  }
+
+  function _mintApproveDeposit(address staker, uint256 amount) internal {
+    usduToken.mint(staker, amount);
+
+    vm.startPrank(staker);
+    usduToken.approve(address(stakedUSDu), amount);
+
+    vm.expectEmit(true, true, true, false);
+    emit Deposit(staker, staker, amount, amount);
+
+    stakedUSDu.deposit(amount, staker);
+    vm.stopPrank();
+  }
+
+  function _redeem(address staker, uint256 shares, bool expectRevert) internal {
+    uint256 balBefore = usduToken.balanceOf(staker);
+
+    vm.startPrank(staker);
+    stakedUSDu.cooldownShares(shares, staker);
+    (uint104 cooldownEnd, uint256 usduAmount) = stakedUSDu.cooldowns(staker);
+
+    vm.warp(cooldownEnd + 1);
+
+    stakedUSDu.unstake(staker);
+    vm.stopPrank();
+
+    uint256 balAfter = usduToken.balanceOf(staker);
+
+    if (expectRevert) {
+      assertEq(balBefore, balAfter, "balance should be zero");
+    } else {
+      assertApproxEqAbs(balBefore + usduAmount, balAfter, 1, "bal check");
+    }
+  }
+
+  function _redeemAssets(address staker, uint256 assets, bool expectRevert) internal {
+    uint256 balBefore = usduToken.balanceOf(staker);
+
+    vm.startPrank(staker);
+
+    stakedUSDu.cooldownAssets(assets, staker);
+    (uint104 cooldownEnd, uint256 usduAmount) = stakedUSDu.cooldowns(staker);
+
+    vm.warp(cooldownEnd + 1);
+
+    stakedUSDu.unstake(staker);
+    vm.stopPrank();
+
+    uint256 balAfter = usduToken.balanceOf(staker);
+
+    if (expectRevert) {
+      assertEq(balBefore, balAfter, "balance check revert");
+    } else {
+      assertEq(balBefore + usduAmount, balAfter, "balance check");
+    }
+  }
+
+  function _transferRewards(uint256 amount, uint256 expectedNewVestingAmount) internal {
+    usduToken.mint(address(rewarder), amount);
+    vm.startPrank(rewarder);
+
+    usduToken.approve(address(stakedUSDu), amount);
+
+    vm.expectEmit(true, false, false, true);
+    emit Transfer(rewarder, address(stakedUSDu), amount);
+    vm.expectEmit(true, false, false, false);
+    emit RewardsReceived(amount, expectedNewVestingAmount);
+
+    stakedUSDu.transferInRewards(amount);
+
+    assertApproxEqAbs(stakedUSDu.getUnvestedAmount(), expectedNewVestingAmount, 1);
+    vm.stopPrank();
+  }
+
+  function _assertVestedAmountIs(uint256 amount) internal view {
+    assertApproxEqAbs(stakedUSDu.totalAssets(), amount, 2, "vestedAmountIs");
+  }
+
+  function testInitialStake() public {
+    uint256 amount = 100 ether;
+    _mintApproveDeposit(alice, amount);
+
+    assertEq(usduToken.balanceOf(alice), 0);
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), amount);
+    assertEq(stakedUSDu.balanceOf(alice), amount);
+  }
+
+  function testInitialStakeBelowMin() public {
+    uint256 amount = 0.99 ether;
+    usduToken.mint(alice, amount);
+    vm.startPrank(alice);
+    usduToken.approve(address(stakedUSDu), amount);
+    vm.expectRevert(IStakedUSDu.MinSharesViolation.selector);
+    stakedUSDu.deposit(amount, alice);
+
+    assertEq(usduToken.balanceOf(alice), amount);
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), 0);
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+  }
+
+  function testCantCooldownBelowMinShares() public {
+    _mintApproveDeposit(alice, 1 ether);
+
+    vm.startPrank(alice);
+    usduToken.approve(address(stakedUSDu), 0.01 ether);
+    vm.expectRevert(IStakedUSDu.MinSharesViolation.selector);
+    stakedUSDu.cooldownShares(0.5 ether, alice);
+  }
+
+  function testCannotStakeWithoutApproval() public {
+    uint256 amount = 100 ether;
+    usduToken.mint(alice, amount);
+
+    vm.startPrank(alice);
+    vm.expectRevert("ERC20: insufficient allowance");
+    stakedUSDu.deposit(amount, alice);
+    vm.stopPrank();
+
+    assertEq(usduToken.balanceOf(alice), amount);
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), 0);
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+  }
+
+  function testStakeUnstake() public {
+    uint256 amount = 100 ether;
+    _mintApproveDeposit(alice, amount);
+
+    assertEq(usduToken.balanceOf(alice), 0);
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), amount);
+    assertEq(stakedUSDu.balanceOf(alice), amount);
+
+    _redeem(alice, amount, false);
+
+    assertEq(usduToken.balanceOf(alice), amount);
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), 0);
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+  }
+
+  function testOnlyRewarderCanReward() public {
+    uint256 amount = 100 ether;
+    uint256 rewardAmount = 0.5 ether;
+    _mintApproveDeposit(alice, amount);
+
+    usduToken.mint(bob, rewardAmount);
+    vm.startPrank(bob);
+
+    vm.expectRevert(
+      "AccessControl: account 0x72c7a47c5d01bddf9067eabb345f5daabdead13f is missing role 0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6"
+    );
+    stakedUSDu.transferInRewards(rewardAmount);
+    vm.stopPrank();
+    assertEq(usduToken.balanceOf(alice), 0);
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), amount);
+    assertEq(stakedUSDu.balanceOf(alice), amount);
+    _assertVestedAmountIs(amount);
+    assertEq(usduToken.balanceOf(bob), rewardAmount);
+  }
+
+  function testStakingAndUnstakingBeforeAfterReward() public {
+    uint256 amount = 100 ether;
+    uint256 rewardAmount = 100 ether;
+    _mintApproveDeposit(alice, amount);
+    _transferRewards(rewardAmount, rewardAmount);
+    _redeem(alice, amount, false);
+    assertEq(usduToken.balanceOf(alice), amount);
+    assertEq(stakedUSDu.totalSupply(), 0);
+  }
+
+  function testFuzzNoJumpInVestedBalance(uint256 amount) public {
+    vm.assume(amount > 0 && amount < 1e60);
+    _transferRewards(amount, amount);
+    vm.warp(block.timestamp + 4 hours);
+    _assertVestedAmountIs(amount / 2);
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), amount);
+  }
+
+  function testOwnerCannotRescueUSDu() public {
+    uint256 amount = 100 ether;
+    _mintApproveDeposit(alice, amount);
+    bytes4 selector = bytes4(keccak256("InvalidToken()"));
+    vm.startPrank(owner);
+    vm.expectRevert(abi.encodeWithSelector(selector));
+    stakedUSDu.rescueTokens(address(usduToken), amount, owner);
+  }
+
+  function testOwnerCanRescuestUSDu() public {
+    uint256 amount = 100 ether;
+    _mintApproveDeposit(alice, amount);
+    vm.prank(alice);
+    stakedUSDu.transfer(address(stakedUSDu), amount);
+    assertEq(stakedUSDu.balanceOf(owner), 0);
+    vm.startPrank(owner);
+    stakedUSDu.rescueTokens(address(stakedUSDu), amount, owner);
+    assertEq(stakedUSDu.balanceOf(owner), amount);
+  }
+
+  function testOwnerCanChangeRewarder() public {
+    assertTrue(stakedUSDu.hasRole(REWARDER_ROLE, address(rewarder)));
+    address newRewarder = address(0x123);
+    vm.startPrank(owner);
+    stakedUSDu.revokeRole(REWARDER_ROLE, rewarder);
+    stakedUSDu.grantRole(REWARDER_ROLE, newRewarder);
+    assertTrue(!stakedUSDu.hasRole(REWARDER_ROLE, address(rewarder)));
+    assertTrue(stakedUSDu.hasRole(REWARDER_ROLE, newRewarder));
+    vm.stopPrank();
+
+    usduToken.mint(rewarder, 1 ether);
+    usduToken.mint(newRewarder, 1 ether);
+
+    vm.startPrank(rewarder);
+    usduToken.approve(address(stakedUSDu), 1 ether);
+    vm.expectRevert(
+      "AccessControl: account 0x5c664540bc6bb6b22e9d1d3d630c73c02edd94b7 is missing role 0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6"
+    );
+    stakedUSDu.transferInRewards(1 ether);
+    vm.stopPrank();
+
+    vm.startPrank(newRewarder);
+    usduToken.approve(address(stakedUSDu), 1 ether);
+    stakedUSDu.transferInRewards(1 ether);
+    vm.stopPrank();
+
+    assertEq(usduToken.balanceOf(address(stakedUSDu)), 1 ether);
+    assertEq(usduToken.balanceOf(rewarder), 1 ether);
+    assertEq(usduToken.balanceOf(newRewarder), 0);
+  }
+
+  function testUSDuValuePerStUSDu() public {
+    _mintApproveDeposit(alice, 100 ether);
+    _transferRewards(100 ether, 100 ether);
+    vm.warp(block.timestamp + 4 hours);
+    _assertVestedAmountIs(150 ether);
+    assertEq(stakedUSDu.convertToAssets(1 ether), 1.5 ether - 1);
+    assertEq(stakedUSDu.totalSupply(), 100 ether);
+    // rounding
+    _mintApproveDeposit(bob, 75 ether);
+    _assertVestedAmountIs(225 ether);
+    assertEq(stakedUSDu.balanceOf(alice), 100 ether);
+    assertEq(stakedUSDu.balanceOf(bob), 50 ether);
+    assertEq(stakedUSDu.convertToAssets(1 ether), 1.5 ether - 1);
+
+    vm.warp(block.timestamp + 4 hours);
+
+    uint256 vestedAmount = 275 ether;
+    _assertVestedAmountIs(vestedAmount);
+
+    assertEq(stakedUSDu.convertToAssets(1 ether), (vestedAmount * 1 ether) / 150 ether);
+
+    // rounding
+    _redeem(bob, stakedUSDu.balanceOf(bob), false);
+    _redeem(alice, 100 ether, false);
+
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+    assertEq(stakedUSDu.balanceOf(bob), 0);
+    assertEq(stakedUSDu.totalSupply(), 0);
+
+    assertApproxEqAbs(usduToken.balanceOf(alice), (vestedAmount * 2) / 3, 1);
+
+    // rounding
+    assertApproxEqAbs(usduToken.balanceOf(bob), vestedAmount / 3, 1);
+
+    assertApproxEqAbs(usduToken.balanceOf(address(stakedUSDu)), 0, 1);
+  }
+
+  function testFairStakeAndUnstakePrices() public {
+    uint256 aliceAmount = 100 ether;
+    uint256 bobAmount = 1000 ether;
+    uint256 rewardAmount = 200 ether;
+    _mintApproveDeposit(alice, aliceAmount);
+    _transferRewards(rewardAmount, rewardAmount);
+    vm.warp(block.timestamp + 4 hours);
+    _mintApproveDeposit(bob, bobAmount);
+    vm.warp(block.timestamp + 4 hours);
+    _redeem(alice, aliceAmount, false);
+    _assertVestedAmountIs(bobAmount + (rewardAmount * 5) / 12);
+  }
+
+  function testFuzzFairStakeAndUnstakePrices(
+    uint256 amount1,
+    uint256 amount2,
+    uint256 amount3,
+    uint256 rewardAmount,
+    uint256 waitSeconds
+  ) public {
+    vm.assume(
+      amount1 >= 100 ether && amount2 > 0 && amount3 > 0 && rewardAmount > 0 && waitSeconds <= 9 hours
+      // 100 trillion USD with 18 decimals
+      && amount1 < 1e32 && amount2 < 1e32 && amount3 < 1e32 && rewardAmount < 1e32
+    );
+
+    uint256 totalContributions = amount1;
+
+    _mintApproveDeposit(alice, amount1);
+
+    _transferRewards(rewardAmount, rewardAmount);
+
+    vm.warp(block.timestamp + waitSeconds);
+
+    uint256 vestedAmount;
+    if (waitSeconds > 8 hours) {
+      vestedAmount = amount1 + rewardAmount;
+    } else {
+      vestedAmount = amount1 + rewardAmount - (rewardAmount * (8 hours - waitSeconds)) / 8 hours;
+    }
+
+    _assertVestedAmountIs(vestedAmount);
+
+    uint256 bobStakedUSDu = (amount2 * (amount1 + 1)) / (vestedAmount + 1);
+    if (bobStakedUSDu > 0) {
+      _mintApproveDeposit(bob, amount2);
+      totalContributions += amount2;
+    }
+
+    vm.warp(block.timestamp + waitSeconds);
+
+    if (waitSeconds > 4 hours) {
+      vestedAmount = totalContributions + rewardAmount;
+    } else {
+      vestedAmount = totalContributions + rewardAmount - ((4 hours - waitSeconds) * rewardAmount) / 4 hours;
+    }
+
+    _assertVestedAmountIs(vestedAmount);
+
+    uint256 gregStakedUSDu = (amount3 * (stakedUSDu.totalSupply() + 1)) / (vestedAmount + 1);
+    if (gregStakedUSDu > 0) {
+      _mintApproveDeposit(greg, amount3);
+      totalContributions += amount3;
+    }
+
+    vm.warp(block.timestamp + 8 hours);
+
+    vestedAmount = totalContributions + rewardAmount;
+
+    _assertVestedAmountIs(vestedAmount);
+
+    uint256 usduPerStakedUSDuBefore = stakedUSDu.convertToAssets(1 ether);
+    uint256 bobUnstakeAmount = (stakedUSDu.balanceOf(bob) * (vestedAmount + 1)) / (stakedUSDu.totalSupply() + 1);
+    uint256 gregUnstakeAmount = (stakedUSDu.balanceOf(greg) * (vestedAmount + 1)) / (stakedUSDu.totalSupply() + 1);
+
+    if (bobUnstakeAmount > 0) _redeem(bob, stakedUSDu.balanceOf(bob), false);
+    uint256 usduPerStakedUSDuAfter = stakedUSDu.convertToAssets(1 ether);
+    if (usduPerStakedUSDuAfter != 0) assertApproxEqAbs(usduPerStakedUSDuAfter, usduPerStakedUSDuBefore, 1 ether);
+
+    if (gregUnstakeAmount > 0) _redeem(greg, stakedUSDu.balanceOf(greg), false);
+    usduPerStakedUSDuAfter = stakedUSDu.convertToAssets(1 ether);
+    if (usduPerStakedUSDuAfter != 0) assertApproxEqAbs(usduPerStakedUSDuAfter, usduPerStakedUSDuBefore, 1 ether);
+
+    _redeem(alice, amount1, false);
+
+    assertEq(stakedUSDu.totalSupply(), 0);
+    assertApproxEqAbs(stakedUSDu.totalAssets(), 0, 10 ** 12);
+  }
+
+  function testTransferRewardsFailsInsufficientBalance() public {
+    usduToken.mint(address(rewarder), 99);
+    vm.startPrank(rewarder);
+
+    usduToken.approve(address(stakedUSDu), 100);
+
+    vm.expectRevert("ERC20: transfer amount exceeds balance");
+    stakedUSDu.transferInRewards(100);
+    vm.stopPrank();
+  }
+
+  function testTransferRewardsFailsZeroAmount() public {
+    usduToken.mint(address(rewarder), 100);
+    vm.startPrank(rewarder);
+
+    usduToken.approve(address(stakedUSDu), 100);
+
+    vm.expectRevert(IStakedUSDu.InvalidAmount.selector);
+    stakedUSDu.transferInRewards(0);
+    vm.stopPrank();
+  }
+
+  function testDecimalsIs18() public view {
+    assertEq(stakedUSDu.decimals(), 18);
+  }
+
+  function testMintWithSlippageCheck(uint256 amount) public {
+    amount = bound(amount, 1 ether, type(uint256).max / 2);
+    usduToken.mint(alice, amount * 2);
+
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+
+    vm.startPrank(alice);
+    usduToken.approve(address(stakedUSDu), amount);
+    vm.expectEmit(true, true, true, true);
+    emit Deposit(alice, alice, amount, amount);
+    stakedUSDu.mint(amount, alice);
+
+    assertEq(stakedUSDu.balanceOf(alice), amount);
+
+    usduToken.approve(address(stakedUSDu), amount);
+    vm.expectEmit(true, true, true, true);
+    emit Deposit(alice, alice, amount, amount);
+    stakedUSDu.mint(amount, alice);
+
+    assertEq(stakedUSDu.balanceOf(alice), amount * 2);
+  }
+
+  function testMintToDiffRecipient() public {
+    usduToken.mint(alice, 1 ether);
+
+    vm.startPrank(alice);
+
+    usduToken.approve(address(stakedUSDu), 1 ether);
+
+    stakedUSDu.deposit(1 ether, bob);
+
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+    assertEq(stakedUSDu.balanceOf(bob), 1 ether);
+  }
+
+  function testFuzzCooldownAssetsUnstake(uint256 amount) public {
+    amount = bound(amount, 1 ether, 1e40);
+    _mintApproveDeposit(alice, amount);
+
+    assertEq(stakedUSDu.balanceOf(alice), amount);
+
+    vm.startPrank(alice);
+
+    _redeemAssets(alice, amount, false);
+
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+
+    assertEq(usduToken.balanceOf(alice), amount);
+  }
+
+  function test_fails_v1_exit_functions_cooldownDuration_gt_0() public {
+    vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
+    stakedUSDu.withdraw(0, address(0), address(0));
+
+    vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
+    stakedUSDu.redeem(0, address(0), address(0));
+
+    vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
+    stakedUSDu.withdraw(0, address(0), address(0));
+
+    vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
+    stakedUSDu.redeem(0, address(0), address(0));
+  }
+
+  function test_fails_v2_if_set_duration_zero() public {
+    vm.prank(owner);
+    stakedUSDu.setCooldownDuration(0);
+
+    vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
+    stakedUSDu.cooldownAssets(0, address(0));
+
+    vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
+    stakedUSDu.cooldownShares(0, address(0));
+  }
+
+  function testFuzzCooldownAssets(uint256 amount) public {
+    amount = bound(amount, 1 ether, 1e40);
+    _mintApproveDeposit(alice, amount);
+
+    assertEq(stakedUSDu.balanceOf(alice), amount);
+
+    vm.startPrank(alice);
+
+    vm.expectEmit(true, true, true, true);
+    emit Withdraw(alice, address(stakedUSDu.silo()), alice, amount, amount);
+
+    stakedUSDu.cooldownAssets(amount, alice);
+
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+  }
+
+  function testFuzzCooldownShares(uint256 amount) public {
+    amount = bound(amount, 1 ether, 1e40);
+    _mintApproveDeposit(alice, amount);
+
+    assertEq(stakedUSDu.balanceOf(alice), amount);
+
+    vm.startPrank(alice);
+
+    vm.expectEmit(true, true, true, true);
+    emit Withdraw(alice, address(stakedUSDu.silo()), alice, amount, amount);
+
+    stakedUSDu.cooldownShares(amount, alice);
+
+    assertEq(stakedUSDu.balanceOf(alice), 0);
+  }
+
+  function testSetCooldown_zero() public {
+    uint24 previousDuration = stakedUSDu.cooldownDuration();
+
+    vm.startPrank(owner);
+    vm.expectEmit(true, true, true, true);
+    emit CooldownDurationUpdated(previousDuration, 0);
+    stakedUSDu.setCooldownDuration(0);
+  }
+
+  function testSetCooldown_error_gt_max() public {
+    vm.expectRevert(IStakedUSDuCooldown.InvalidCooldown.selector);
+
+    vm.prank(owner);
+    stakedUSDu.setCooldownDuration(90 days + 1);
+  }
+
+  function testSetCooldown_fuzz(uint24 newCooldownDuration) public {
+    vm.assume(newCooldownDuration > 0 && newCooldownDuration <= 7776000);
+    uint24 previousDuration = stakedUSDu.cooldownDuration();
+
+    vm.expectEmit(true, true, true, true);
+    emit CooldownDurationUpdated(previousDuration, newCooldownDuration);
+
+    vm.prank(owner);
+    stakedUSDu.setCooldownDuration(newCooldownDuration);
+  }
+}
