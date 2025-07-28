@@ -1,0 +1,25 @@
+[
+  {
+    "inputs": [],
+    "name": "getBeaconStat",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "depositedValidators",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "beaconValidators",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "beaconBalance",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

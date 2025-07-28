@@ -1,0 +1,36 @@
+[
+  {
+    "inputs": [],
+    "name": "CantRenounceOwnership",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "OnlyMinter",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddressException",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newMinter",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldMinter",
+        "type": "address"
+      }
+    ],
+    "name": "MinterUpdated",
+    "type": "event"
+  }
+]

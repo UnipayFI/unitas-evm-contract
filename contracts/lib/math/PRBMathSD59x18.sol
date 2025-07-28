@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: WTFPL
-pragma solidity 0.8.10;
+pragma solidity 0.8.19;
 
 import "./PRBMath.sol";
 

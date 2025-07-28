@@ -5,3 +5,7 @@ forge-std/=lib/forge-std/src/
 @aave/core-v3=lib/aave-v3-core/
 @bgd-helpers=lib/aave-helpers/src/
 solidity-utils/=lib/aave-helpers/lib/solidity-utils/src/
+erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/
+halmos-cheatcodes/=lib/openzeppelin-contracts-upgradeable/lib/halmos-cheatcodes/src/
+solidity-stringutils/=lib/openzeppelin-foundry-upgrades/lib/solidity-stringutils/
+hardhat/=node_modules/hardhat/
