@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.19;
+pragma solidity ^0.8.0;
 
 import "./StakedUSDu.sol";
 import "./interfaces/IStakedUSDuCooldown.sol";
@@ -76,6 +76,13 @@ contract StakedUSDuV2 is IStakedUSDuCooldown, StakedUSDu {
   /// @dev unstake can be called after cooldown have been set to 0, to let accounts to be able to claim remaining assets locked at Silo
   /// @param receiver Address to send the assets by the staker
   function unstake(address receiver) external {
+    if (
+      hasRole(FULL_RESTRICTED_STAKER_ROLE, _msgSender()) ||
+      hasRole(FULL_RESTRICTED_STAKER_ROLE, receiver)
+    ) {
+      revert OperationNotAllowed();
+    }
+
     UserCooldown storage userCooldown = cooldowns[msg.sender];
     uint256 assets = userCooldown.underlyingAmount;
 

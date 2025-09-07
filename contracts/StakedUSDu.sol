@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.19;
+pragma solidity ^0.8.0;
 
 /**
  * solhint-disable private-vars-leading-underscore
@@ -22,17 +22,17 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
 
   /* ------------- CONSTANTS ------------- */
   /// @notice The role that is allowed to distribute rewards to this contract
-  bytes32 private constant REWARDER_ROLE = keccak256("REWARDER_ROLE");
+  bytes32 internal constant REWARDER_ROLE = keccak256("REWARDER_ROLE");
   /// @notice The role that is allowed to blacklist and un-blacklist addresses
-  bytes32 private constant BLACKLIST_MANAGER_ROLE = keccak256("BLACKLIST_MANAGER_ROLE");
+  bytes32 internal constant BLACKLIST_MANAGER_ROLE = keccak256("BLACKLIST_MANAGER_ROLE");
   /// @notice The role which prevents an address to stake
-  bytes32 private constant SOFT_RESTRICTED_STAKER_ROLE = keccak256("SOFT_RESTRICTED_STAKER_ROLE");
+  bytes32 internal constant SOFT_RESTRICTED_STAKER_ROLE = keccak256("SOFT_RESTRICTED_STAKER_ROLE");
   /// @notice The role which prevents an address to transfer, stake, or unstake. The owner of the contract can redirect address staking balance if an address is in full restricting mode.
-  bytes32 private constant FULL_RESTRICTED_STAKER_ROLE = keccak256("FULL_RESTRICTED_STAKER_ROLE");
+  bytes32 internal constant FULL_RESTRICTED_STAKER_ROLE = keccak256("FULL_RESTRICTED_STAKER_ROLE");
   /// @notice The vesting period of lastDistributionAmount over which it increasingly becomes available to stakers
-  uint256 private constant VESTING_PERIOD = 8 hours;
+  uint256 internal constant VESTING_PERIOD = 8 hours;
   /// @notice Minimum non-zero shares amount to prevent donation attack
-  uint256 private constant MIN_SHARES = 1 ether;
+  uint256 internal constant MIN_SHARES = 1 ether;
 
   /* ------------- STATE VARIABLES ------------- */
 
@@ -67,9 +67,9 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    *
    */
   constructor(IERC20 _asset, address _initialRewarder, address _owner)
-    ERC20("Staked USDu", "stUSDu")
+    ERC20("Staked USDu", "sUSDu")
     ERC4626(_asset)
-    ERC20Permit("stUSDu")
+    ERC20Permit("sUSDu")
   {
     if (_owner == address(0) || _initialRewarder == address(0) || address(_asset) == address(0)) {
       revert InvalidZeroAddress();
@@ -98,7 +98,7 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
   }
 
   /**
-   * @notice Allows the owner (DEFAULT_ADMIN_ROLE) and blacklist managers to blacklist addresses.
+   * @notice Allows blacklist managers to blacklist addresses.
    * @param target The address to blacklist.
    * @param isFullBlacklisting Soft or full blacklisting level.
    */
@@ -112,7 +112,7 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
   }
 
   /**
-   * @notice Allows the owner (DEFAULT_ADMIN_ROLE) and blacklist managers to un-blacklist addresses.
+   * @notice Allows blacklist managers to un-blacklist addresses.
    * @param target The address to un-blacklist.
    * @param isFullBlacklisting Soft or full blacklisting level.
    */
@@ -206,7 +206,11 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
     notZero(assets)
     notZero(shares)
   {
-    if (hasRole(SOFT_RESTRICTED_STAKER_ROLE, caller) || hasRole(SOFT_RESTRICTED_STAKER_ROLE, receiver)) {
+    if (
+      hasRole(SOFT_RESTRICTED_STAKER_ROLE, caller) ||
+      hasRole(SOFT_RESTRICTED_STAKER_ROLE, receiver) ||
+      hasRole(FULL_RESTRICTED_STAKER_ROLE, caller)
+    ) {
       revert OperationNotAllowed();
     }
     super._deposit(caller, receiver, assets, shares);
@@ -228,7 +232,11 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
     notZero(assets)
     notZero(shares)
   {
-    if (hasRole(FULL_RESTRICTED_STAKER_ROLE, caller) || hasRole(FULL_RESTRICTED_STAKER_ROLE, receiver)) {
+    if (
+      hasRole(FULL_RESTRICTED_STAKER_ROLE, caller) ||
+      hasRole(FULL_RESTRICTED_STAKER_ROLE, receiver) ||
+      hasRole(FULL_RESTRICTED_STAKER_ROLE, _owner)
+    ) {
       revert OperationNotAllowed();
     }
 

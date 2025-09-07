@@ -14,7 +14,7 @@
 
 ## Goals
 
-The goal of Unitas is to offer a permissionless stablecoin, USDu, to defi users and to offer users yield for being in our ecosystem. Unlike USDC where Circle captures the yield, USDu holders can stake their USDu in exchange to receive stUSDu, which increases in value relative to USDu as the protocol earns yield. (Similar to rETH increasing in value with respect to ETH)
+The goal of Unitas is to offer a permissionless stablecoin, USDu, to defi users and to offer users yield for being in our ecosystem. Unlike USDC where Circle captures the yield, USDu holders can stake their USDu in exchange to receive sUSDu, which increases in value relative to USDu as the protocol earns yield. (Similar to rETH increasing in value with respect to ETH)
 
 ### Stablecoin contract
 
@@ -32,11 +32,11 @@ In the scenario where ETH goes down 90%, the long 10 stETH is worth 1500 USD. Wh
 
 USDu works by users sending in their stETH in exchange for USDu to be minted. Unitas moves stETH to custodian accounts and shorts equvilant amount of ETH perps on exchanges.
 
-stETH earns 3-4% yield annualized. Short perps earn 4-10% annualized. The yield is sent to our insurance fund 3 times a day, and a percentage of the yield is converted to USDu and sent to our staking contract increasing the value of each stUSDu with respect to USDu.
+stETH earns 3-4% yield annualized. Short perps earn 4-10% annualized. The yield is sent to our insurance fund 3 times a day, and a percentage of the yield is converted to USDu and sent to our staking contract increasing the value of each sUSDu with respect to USDu.
 
 ## How yield is distributed to end users
 
-USDu holders have the option to stake their USDu in our staking contract, getting stUSDu in return. As the protocol makes money on the long stETH yield, plus short ETH perps, the profits are moved to an insurance fund (a simple gnosis multisig) controlled by the protocol. 70% of the daily profits will be converted to USDu and deposited to the staking contract, increasing the ratio of USDu to stUSDu in staking contract and stUSDu value.
+USDu holders have the option to stake their USDu in our staking contract, getting sUSDu in return. As the protocol makes money on the long stETH yield, plus short ETH perps, the profits are moved to an insurance fund (a simple gnosis multisig) controlled by the protocol. 70% of the daily profits will be converted to USDu and deposited to the staking contract, increasing the ratio of USDu to sUSDu in staking contract and sUSDu value.
 
 Users who choose not to stake their USDu will not be earning yield. The lower the ratio of USDu being in staking contract, the higher the yield is for users who choose to stake. The remainding yield is retained by the protocol as an insurance fund, used in case of protocol losses, paying bug bounties, etc.
 
@@ -58,7 +58,7 @@ Loss of minting private key, allowing hackers to mint unlimited USDu for no coll
 
 ## Smart contract architecture
 
-Our smart contract architecture is seperate into 3 pieces. One contract for minting/redemption, one contract for our stablecoin, USDu, an ERC20 token. And one contract for our staked, yield bearing stablecoin stUSDu, an extension of the ERC 4626 standard.
+Our smart contract architecture is seperate into 3 pieces. One contract for minting/redemption, one contract for our stablecoin, USDu, an ERC20 token. And one contract for our staked, yield bearing stablecoin sUSDu, an extension of the ERC 4626 standard.
 
 ## Minting/Redemption contract
 
@@ -104,15 +104,15 @@ Cold wallet - Admin key to be cold wallet, only used in rare scenarios of restar
 
 The staking contract modifies the ERC4626 standard with cooldown periods for unstaking and blacklisting features.
 
-Users have the option to stake their USDu to earn yield from the stETH long - short ETH perps mechanism we use to hedge USDu. Users deposit USDu and at the prevailing rate, get stUSDu in return, which can be transferred and used immediately.
+Users have the option to stake their USDu to earn yield from the stETH long - short ETH perps mechanism we use to hedge USDu. Users deposit USDu and at the prevailing rate, get sUSDu in return, which can be transferred and used immediately.
 
-At launch, stUSDu = 1 USDu. As yield is accured from the short perps position, Unitas will move the profits to an insurance fund (likely held in USDC), and from there dedicate a percentage of daily yield to stUSDu holders. The profit is converted to USDu, then deposited into the staking contract, increasing the value of each stUSDu with respect to USDu.
+At launch, sUSDu = 1 USDu. As yield is accured from the short perps position, Unitas will move the profits to an insurance fund (likely held in USDC), and from there dedicate a percentage of daily yield to sUSDu holders. The profit is converted to USDu, then deposited into the staking contract, increasing the value of each sUSDu with respect to USDu.
 
 ### Unstaking
 
-To unstake, users must have the stUSDu in their address. Users can unstake any amount of stUSDu up to the amount they own. Upon running the unstake function with the amount they wish to unstake, eg 1000 stUSDu, the 1000 stUSDu will be burnt from the user’s wallet immediately.
+To unstake, users must have the sUSDu in their address. Users can unstake any amount of sUSDu up to the amount they own. Upon running the unstake function with the amount they wish to unstake, eg 1000 sUSDu, the 1000 sUSDu will be burnt from the user’s wallet immediately.
 
-At the prevailing rate, it’s settled for 1100 USDu (assuming rate is 1 stUSDu = 1.1 USDu). However the 1100 USDu is sent to a seperate smart contract that's initiated in the constructor of the staking contract (hereby called Silo contract).
+At the prevailing rate, it’s settled for 1100 USDu (assuming rate is 1 sUSDu = 1.1 USDu). However the 1100 USDu is sent to a seperate smart contract that's initiated in the constructor of the staking contract (hereby called Silo contract).
 
 The funds are locked for the cooldown period, default at 14 days. Only after 14 days cooldown can the user withdraw the 1100 USDu and no interest is earned during cooldown. An additional transaction is needed from the user to withdraw. The withdraw function is called on the same staking contract, which calls the silo contract and moves the user's USDu in silo contract to the user's address.
 
@@ -145,7 +145,7 @@ There’s 2 levels of blacklisting in the staking contract.
 
 Restricted staking - Address cannot invoke the contract function to stake. All other functions are possible, eg transfer, unstaking.
 
-Full restriction - Address cannot interact with the staking smart contract at all. Owner can wipe balance of fully restricted addresses and re-issue elsewhere. Their stUSDu will be burnt and total supply reduced by the burnt amount, effectively increasing the value of stUSDu with respect to USDu for other token holders.
+Full restriction - Address cannot interact with the staking smart contract at all. Owner can wipe balance of fully restricted addresses and re-issue elsewhere. Their sUSDu will be burnt and total supply reduced by the burnt amount, effectively increasing the value of sUSDu with respect to USDu for other token holders.
 
 Restricted staking is used for addresses in countries not legally compliant with receiving yield from Unitas. Full restriction is for sanctioned addresses or addresses involved in hacks.
 

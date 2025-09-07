@@ -251,7 +251,7 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     stakedUSDu.rescueTokens(address(usduToken), amount, owner);
   }
 
-  function testOwnerCanRescuestUSDu() public {
+  function testOwnerCanRescuesUSDu() public {
     uint256 amount = 100 ether;
     _mintApproveDeposit(alice, amount);
     vm.prank(alice);
@@ -293,7 +293,7 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     assertEq(usduToken.balanceOf(newRewarder), 0);
   }
 
-  function testUSDuValuePerStUSDu() public {
+  function tesUSDuValuePerStUSDu() public {
     _mintApproveDeposit(alice, 100 ether);
     _transferRewards(100 ether, 100 ether);
     vm.warp(block.timestamp + 4 hours);

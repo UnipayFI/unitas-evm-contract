@@ -89,7 +89,10 @@ contract StakedUSDuV2CooldownBlacklistTest is Test, IERC20Events {
 
     if (expectRevert) {
       vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
-    } else {}
+      stakedUSDu.cooldownAssets(amount, staker);
+      vm.stopPrank();
+      return;
+    }
 
     stakedUSDu.cooldownAssets(amount, staker);
     (uint104 cooldownEnd, uint256 assetsOut) = stakedUSDu.cooldowns(staker);
@@ -184,10 +187,10 @@ contract StakedUSDuV2CooldownBlacklistTest is Test, IERC20Events {
     _mintApproveDeposit(alice, _amount, true);
   }
 
-  function test_fullBlacklist_withdraw_pass() public {
+  function test_fullBlacklist_withdraw_reverts() public {
     _mintApproveDeposit(alice, _amount, false);
 
-    // Alice soft blacklisted
+    // Alice full blacklisted
     vm.startPrank(owner);
     stakedUSDu.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
@@ -239,6 +242,23 @@ contract StakedUSDuV2CooldownBlacklistTest is Test, IERC20Events {
     stakedUSDu.transfer(alice, _amount);
   }
 
+  function test_fullBlacklist_bypassed_via_third_party_reverts() public {
+    // alice (will be blacklisted) deposits
+    _mintApproveDeposit(alice, _amount, false);
+
+    // alice is added to the full blacklist
+    vm.startPrank(owner);
+    stakedUSDu.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    vm.stopPrank();
+
+    // bob (clean caller) attempts to start cooldown for alice (blacklisted owner)
+    // This must fail because cooldownAssets calls the patched _withdraw, which checks the status of `owner` (alice).
+    vm.startPrank(bob);
+    vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
+    stakedUSDu.cooldownAssets(_amount, alice);
+    vm.stopPrank();
+  }
+
   function test_fullBlacklist_user_can_not_burn_and_donate_to_vault() public {
     _mintApproveDeposit(alice, _amount, false);
 
@@ -270,7 +290,7 @@ contract StakedUSDuV2CooldownBlacklistTest is Test, IERC20Events {
     _mintApproveDeposit(alice, _amount, true);
   }
 
-  function test_softFullBlacklist_withdraw_pass() public {
+  function test_softFullBlacklist_withdraw_logic() public {
     _mintApproveDeposit(alice, _amount, false);
 
     // Alice soft blacklisted

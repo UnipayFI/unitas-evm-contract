@@ -3,6 +3,7 @@ src = "contracts"
 out = "out"
 optimizer = true
 optimizer_runs = 20000
+solc_version = "0.8.19"
 libs = ["lib"]
 test = 'test/foundry'
 cache_path = 'forge-cache'

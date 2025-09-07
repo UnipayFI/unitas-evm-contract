@@ -20,7 +20,7 @@ To get an overview of Unitas, please visit our gitbook: https://Unitas-labs.gitb
 
 ## Goals
 
-The goal of Unitas is to offer a permissionless stablecoin, USDu, to defi users and to offer users yield for being in our ecosystem. Unlike USDC where Circle captures the yield, USDu holders can stake their USDu in exchange to receive stUSDu, which increases in value relative to USDu as the protocol earns yield. (Similar to rETH increasing in value with respect to ETH)
+The goal of Unitas is to offer a permissionless stablecoin, USDu, to defi users and to offer users yield for being in our ecosystem. Unlike USDC where Circle captures the yield, USDu holders can stake their USDu in exchange to receive sUSDu, which increases in value relative to USDu as the protocol earns yield. (Similar to rETH increasing in value with respect to ETH)
 
 ## How Unitas generated yield
 
@@ -76,13 +76,13 @@ The `DEFAULT_ADMIN_ROLE`, also our Unitas multisig, is required to re-enable min
 
 ### StakedUSDuV2.sol
 
-`StakedUSDuV2.sol` is where holders of USDu stablecoin can stake their stablecoin, get stUSDu in return and earn yield. Our protocol's yield is paid out by having a `REWARDER` role of the staking contract send yield in USDu, increasing the stUSDu value with respect to USDu.
+`StakedUSDuV2.sol` is where holders of USDu stablecoin can stake their stablecoin, get sUSDu in return and earn yield. Our protocol's yield is paid out by having a `REWARDER` role of the staking contract send yield in USDu, increasing the sUSDu value with respect to USDu.
 
 This contract is a modification of the ERC4626 standard, with a change to vest in rewards linearly over 8 hours to prevent users frontrunning the payment of yield, then unwinding their position right after (or even in the same block). This is also the reason for `REWARDER` role. Otherwise users can be denied rewards if random addresses send in 1 wei and modifies the rate of reward vesting.
 
-There's also an additional change to add a 14 day cooldown period on unstaking stUSDu. When the unstake process is initiated, from the user's perspective, stUSDu is burnt immediately, and they will be able to invoke the withdraw function after cooldown is up to get their USDu in return. Behind the scenes, on burning of stUSDu, USDu is sent to a seperate silo contract to hold the funds for the cooldown period. And on withdrawal, the staking contract moves user funds from silo contract out to the user's address. The cooldown is configurable up to 90 days.
+There's also an additional change to add a 14 day cooldown period on unstaking sUSDu. When the unstake process is initiated, from the user's perspective, sUSDu is burnt immediately, and they will be able to invoke the withdraw function after cooldown is up to get their USDu in return. Behind the scenes, on burning of sUSDu, USDu is sent to a seperate silo contract to hold the funds for the cooldown period. And on withdrawal, the staking contract moves user funds from silo contract out to the user's address. The cooldown is configurable up to 90 days.
 
-Due to legal requirements, there's a `SOFT_RESTRICTED_STAKER_ROLE` and `FULL_RESTRICTED_STAKER_ROLE`. The former is for addresses based in countries we are not allowed to provide yield to, for example USA. Addresses under this category will be soft restricted. They cannot deposit USDu to get stUSDu or withdraw stUSDu for USDu. However they can participate in earning yield by buying and selling stUSDu on the open market.
+Due to legal requirements, there's a `SOFT_RESTRICTED_STAKER_ROLE` and `FULL_RESTRICTED_STAKER_ROLE`. The former is for addresses based in countries we are not allowed to provide yield to, for example USA. Addresses under this category will be soft restricted. They cannot deposit USDu to get sUSDu or withdraw sUSDu for USDu. However they can participate in earning yield by buying and selling sUSDu on the open market.
 
 `FULL_RESTRCITED_STAKER_ROLE` is for sanction/stolen funds, or if we get a request from law enforcement to freeze funds. Addresses fully restricted cannot move their funds, and only Unitas can unfreeze the address. Unitas also have the ability to repossess funds of an address fully restricted. We understand having the ability to freeze and repossess funds of any address Unitas choose could be a cause of concern for defi users decisions to stake USDu. While we aim to make our operations as secure as possible, interacting with Unitas still requires a certain amount of trust in our organisation outside of code on the smart contract, given the tie into cefi to earn yield.
 

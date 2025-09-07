@@ -89,7 +89,7 @@ contract LendingMarketHelper is Test, USDuListingHelper, IAStEthEvents, Utils {
       address(cbETH)
     );
 
-    listUSDu(contracts, USDU_ADDRESS, aclManager);
+    lisUSDu(contracts, USDU_ADDRESS, aclManager);
 
     DataTypes.ReserveData memory stEthReserveData = pool.getReserveData(address(stETH));
 
