@@ -17,5 +17,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 func.id = "usdu_silo"
 func.tags = ["USDuSilo"]
-func.dependencies = ["USDu", "StakedUSDuV2", "UnitasMinting"]
+func.dependencies = ["USDu", "StakedUSDuV2", "UnitasMintingV2"]
 export default func

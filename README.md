@@ -6,10 +6,10 @@
 
 | 合约名称 | 地址 | 说明 |
 |---------|------|------|
-| USDu | [0x4735B34869edc443814829Af93BcAAe76F0C6c68](https://testnet.bscscan.com/address/0x4735B34869edc443814829Af93BcAAe76F0C6c68) | Unitas 稳定币合约 |
-| UnitasMinting | [0x9C509d3eFD5404e38f37B11771590864AB77D190](https://testnet.bscscan.com/address/0x9C509d3eFD5404e38f37B11771590864AB77D190) | 铸造和赎回合约 |
-| UnitasMintingV2 | [0x93A3a533941c60A3004DF837ca51F58bb5D401e2](https://testnet.bscscan.com/address/0x93A3a533941c60A3004DF837ca51F58bb5D401e2) | 铸造和赎回合约 |
-| StakedUSDuV2 | [0x03a205AD47Bb97545eEE66DDdE7C4821Fcd22833](https://testnet.bscscan.com/address/0x03a205AD47Bb97545eEE66DDdE7C4821Fcd22833) | USDu 质押合约 |
+| USDu | [0xabFD3253fD009414b2911543880972d98F2Facd2](https://testnet.bscscan.com/address/0xabFD3253fD009414b2911543880972d98F2Facd2) | USDu 稳定币合约 |
+| UnitasMintingV2 | [0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03](https://testnet.bscscan.com/address/0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03) | 铸造和赎回合约 |
+| StakedUSDuV2 | [0xfaf2A0372742A305817f5a634cA8E1C75a3Cf3E1](https://testnet.bscscan.com/address/0xfaf2A0372742A305817f5a634cA8E1C75a3Cf3E1) | sUSDu 质押合约 |
+| USDUSilo | [0xcB2Cea5CF51Bf346406Db6c64a9BA40380F217A0](https://testnet.bscscan.com/address/0xcB2Cea5CF51Bf346406Db6c64a9BA40380F217A0) | USDu  资金合约 |
 
 ### 配置信息
 
