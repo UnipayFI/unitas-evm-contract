@@ -474,3 +474,109 @@ error GlobalMaxMintPerBlockExceeded();
 error GlobalMaxRedeemPerBlockExceeded();
 ```
 
+
+### StakedUSDu & StakedUSDuV2
+
+`StakedUSDu` 是一个基于 OpenZeppelin ERC4626 标准的金库合约，允许用户质押 USDu 来获取收益。`StakedUSDuV2` 在此基础上增加了提款冷却（Cooldown）机制。
+
+#### 角色和权限
+
+- `REWARDER_ROLE`: 允许向合约中分发奖励的角色。
+- `BLACKLIST_MANAGER_ROLE`: 允许将地址加入黑名单或从中移除的角色。
+- `SOFT_RESTRICTED_STAKER_ROLE`: “软限制”角色，被添加的地址将无法进行质押（`deposit`）。
+- `FULL_RESTRICTED_STAKER_ROLE`: “完全限制”角色（黑名单），被添加的地址无法进行任何操作（质押、提款、转账）。
+- `DEFAULT_ADMIN_ROLE`: 超级管理员，可以管理以上角色以及合约的关键参数。
+
+#### 主要方法
+
+##### 质押流程
+
+用户可以通过存入 `USDu` 来获取 `sUSDu` 份额。
+
+```solidity
+// 根据资产数量进行质押
+function deposit(uint256 assets, address receiver) external returns (uint256 shares)
+
+// 根据份额数量进行质押
+function mint(uint256 shares, address receiver) external returns (uint256 assets)
+```
+
+##### 提款流程
+
+提款流程分为两种模式，由 `StakedUSDuV2` 合约中的 `cooldownDuration` 参数决定。
+
+
+**冷却提款 (V2 `cooldownDuration` > 0)**
+
+在此模式下，标准的 `withdraw` 和 `redeem` 方法会被禁用。用户必须先发起一个冷却请求，等待冷却期结束后才能最终取出资产。
+
+目前`cooldownDuration`为 7 天
+
+1.  **发起冷却**
+    ```solidity
+    // 根据资产数量发起冷却
+    function cooldownAssets(uint256 assets, address owner) external returns (uint256 shares)
+
+    // 根据份额数量发起冷却
+    function cooldownShares(uint256 shares, address owner) external returns (uint256 assets)
+    ```
+
+2.  **执行提款**
+    等待 `cooldownDuration` 时间结束后，调用此方法以完成提款。
+    ```solidity
+    function unstake(address receiver) external
+    ```
+
+#### 管理方法
+
+1.  **黑名单管理** (`BLACKLIST_MANAGER_ROLE`)
+    ```solidity
+    function addToBlacklist(address target, bool isFullBlacklisting) external
+    function removeFromBlacklist(address target, bool isFullBlacklisting) external
+    ```
+
+2.  **奖励管理** (`REWARDER_ROLE`)
+    ```solidity
+    function transferInRewards(uint256 amount) external
+    ```
+
+3.  **紧急情况** (`DEFAULT_ADMIN_ROLE`)
+    ```solidity
+    // 转移被完全拉黑地址的余额
+    function redistributeLockedAmount(address from, address to) external
+    // 提取意外转入的非核心资产
+    function rescueTokens(address token, uint256 amount, address to) external
+    ```
+
+4.  **V2 配置** (`DEFAULT_ADMIN_ROLE`)
+    ```solidity
+    function setCooldownDuration(uint24 duration) external
+    ```
+
+#### 事件
+
+```solidity
+event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
+event Withdraw(address indexed caller, address indexed receiver, address indexed owner, uint256 assets, uint256 shares);
+event RewardsReceived(uint256 amount, uint256 newVestingAmount);
+event LockedAmountRedistributed(address indexed from, address indexed to, uint256 amountToDistribute);
+// V2 Only
+event CooldownDurationUpdated(uint24 previousDuration, uint24 newDuration);
+```
+
+#### 错误码
+
+```solidity
+error InvalidAmount();
+error CantBlacklistOwner();
+error InvalidZeroAddress();
+error StillVesting();
+error InvalidToken();
+error OperationNotAllowed();
+error MinSharesViolation();
+// V2 Only
+error InvalidCooldown();
+error ExcessiveWithdrawAmount();
+error ExcessiveRedeemAmount();
+```
+
