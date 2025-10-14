@@ -9,7 +9,6 @@
 | USDu | [0xabFD3253fD009414b2911543880972d98F2Facd2](https://testnet.bscscan.com/address/0xabFD3253fD009414b2911543880972d98F2Facd2) | USDu 稳定币合约 |
 | UnitasMintingV2 | [0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03](https://testnet.bscscan.com/address/0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03) | 铸造和赎回合约 |
 | StakedUSDuV2 | [0xfaf2A0372742A305817f5a634cA8E1C75a3Cf3E1](https://testnet.bscscan.com/address/0xfaf2A0372742A305817f5a634cA8E1C75a3Cf3E1) | sUSDu 质押合约 |
-| USDUSilo | [0xcB2Cea5CF51Bf346406Db6c64a9BA40380F217A0](https://testnet.bscscan.com/address/0xcB2Cea5CF51Bf346406Db6c64a9BA40380F217A0) | USDu  资金合约 |
 
 ### 配置信息
 
