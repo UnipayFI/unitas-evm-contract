@@ -526,6 +526,29 @@ function mint(uint256 shares, address receiver) external returns (uint256 assets
     function unstake(address receiver) external
     ```
 
+##### 获取 Cooldown
+
+查询用户`cooldown`信息
+
+```solidity
+struct UserCooldown {
+  uint104 cooldownEnd; // 到期时间 
+  uint256 underlyingAmount; // 可领取数量
+}
+
+function cooldowns(address owner) external view returns (UserCooldown memory userCooldown);
+```
+
+##### 获取VestingAmount和UnvestedAmount
+
+```solidity
+/// 获取这个周期的vestingAmount
+function vestingAmount() external view returns (uint256);
+
+/// 获取这个周期还未解锁的奖励数量
+function getUnvestedAmount() external view returns (uint256);
+```
+
 #### 管理方法
 
 1.  **黑名单管理** (`BLACKLIST_MANAGER_ROLE`)
