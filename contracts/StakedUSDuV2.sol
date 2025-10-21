@@ -49,26 +49,22 @@ contract StakedUSDuV2 is IStakedUSDuCooldown, StakedUSDu {
   /**
    * @dev See {IERC4626-withdraw}.
    */
-  function withdraw(uint256 assets, address receiver, address owner)
-    public
-    virtual
-    override
-    ensureCooldownOff
-    returns (uint256)
-  {
+  function withdraw(
+    uint256 assets,
+    address receiver,
+    address owner
+  ) public virtual override ensureCooldownOff returns (uint256) {
     return super.withdraw(assets, receiver, owner);
   }
 
   /**
    * @dev See {IERC4626-redeem}.
    */
-  function redeem(uint256 shares, address receiver, address owner)
-    public
-    virtual
-    override
-    ensureCooldownOff
-    returns (uint256)
-  {
+  function redeem(
+    uint256 shares,
+    address receiver,
+    address owner
+  ) public virtual override ensureCooldownOff returns (uint256) {
     return super.redeem(shares, receiver, owner);
   }
 
@@ -76,10 +72,7 @@ contract StakedUSDuV2 is IStakedUSDuCooldown, StakedUSDu {
   /// @dev unstake can be called after cooldown have been set to 0, to let accounts to be able to claim remaining assets locked at Silo
   /// @param receiver Address to send the assets by the staker
   function unstake(address receiver) external {
-    if (
-      hasRole(FULL_RESTRICTED_STAKER_ROLE, _msgSender()) ||
-      hasRole(FULL_RESTRICTED_STAKER_ROLE, receiver)
-    ) {
+    if (hasRole(FULL_RESTRICTED_STAKER_ROLE, _msgSender()) || hasRole(FULL_RESTRICTED_STAKER_ROLE, receiver)) {
       revert OperationNotAllowed();
     }
 

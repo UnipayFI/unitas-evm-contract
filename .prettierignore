@@ -1,1 +1,36 @@
+# Dependencies
+node_modules/
 lib/
+
+# Build outputs
+artifacts/
+cache/
+cache_hardhat/
+forge-cache/
+out/
+typechain-types/
+abi/
+
+# Coverage
+coverage/
+coverage.json
+
+# Environment
+.env
+.env.*
+
+# Git
+.git/
+
+# Deployments (if you don't want to format them)
+deployments/
+
+# Generated files
+*.log
+*.tsbuildinfo
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+

@@ -10,6 +10,19 @@ cache_path = 'forge-cache'
 fs_permissions = [{ access = "read", path = "./out"}]
 evm_version = "shanghai"
 
+[profile.dev]
+src = "contracts"
+out = "out"
+optimizer = true
+optimizer_runs = 200
+solc_version = "0.8.19"
+libs = ["lib"]
+test = 'test/foundry'
+cache_path = 'forge-cache'
+fs_permissions = [{ access = "read", path = "./out"}]
+evm_version = "shanghai"
+via_ir = true
+
 [fmt]
 tab_width = 2
 

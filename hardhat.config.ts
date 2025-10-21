@@ -17,9 +17,10 @@ dotenv.config();
 const DEFAULT_COMPILER_SETTINGS = {
     version: "0.8.19",
     settings: {
+        viaIR: true,
         optimizer: {
             enabled: true,
-            runs: 500,
+            runs: 20,
         },
         metadata: {
             bytecodeHash: "none",
