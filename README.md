@@ -17,8 +17,7 @@
 | 代币 | 地址 | 说明 |
 |------|------|------|
 | WETH | [0xae13d989dac2f0debff460ac112a837c89baa7cd](https://testnet.bscscan.com/address/0xae13d989dac2f0debff460ac112a837c89baa7cd) | Wrap BNB |
-| USDT | [0x337610d27c682e347c9cd60bd4b3b107c9d34ddd](https://testnet.bscscan.com/address/0x337610d27c682e347c9cd60bd4b3b107c9d34ddd) | USDT 稳定币 |
-| USDC | [0xfe146E53b08E4204A26E3cC5037077bAa52EB174](https://testnet.bscscan.com/address/0xfe146E53b08E4204A26E3cC5037077bAa52EB174) | mUSDT 稳定币 |
+| USDT | [0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142](https://testnet.bscscan.com/address/0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142) | USDT 稳定币 |
 
 #### 每区块限额
 
