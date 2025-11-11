@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8;
 
-import {console} from "forge-std/console.sol";
+import { console } from "forge-std/console.sol";
 import "forge-std/Test.sol";
-import {SigUtils} from "forge-std/SigUtils.sol";
+import { SigUtils } from "forge-std/SigUtils.sol";
 
 import "../../../contracts/USDu.sol";
 import "../../../contracts/StakedUSDu.sol";
@@ -26,7 +26,11 @@ contract StakedUSDuTest is Test, IERC20Events {
 
   event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
   event Withdraw(
-    address indexed caller, address indexed receiver, address indexed owner, uint256 assets, uint256 shares
+    address indexed caller,
+    address indexed receiver,
+    address indexed owner,
+    uint256 assets,
+    uint256 shares
   );
   event RewardsReceived(uint256 indexed amount, uint256 newVestingUSDuAmount);
 

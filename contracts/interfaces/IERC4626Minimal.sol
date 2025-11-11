@@ -38,6 +38,10 @@ interface IERC4626Minimal {
 
   event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
   event Withdraw(
-    address indexed caller, address indexed receiver, address indexed owner, uint256 assets, uint256 shares
+    address indexed caller,
+    address indexed receiver,
+    address indexed owner,
+    uint256 assets,
+    uint256 shares
   );
 }

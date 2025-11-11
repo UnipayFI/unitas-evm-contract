@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { IERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 
 /**
  * @title TestnetERC20
@@ -24,18 +24,24 @@ contract TestnetERC20 is IERC20Permit, ERC20, Ownable {
   constructor(string memory name, string memory symbol, address owner) ERC20(name, symbol) {
     uint256 chainId = block.chainid;
 
-    DOMAIN_SEPARATOR =
-      keccak256(abi.encode(EIP712_DOMAIN, keccak256(bytes(name)), keccak256(EIP712_REVISION), chainId, address(this)));
+    DOMAIN_SEPARATOR = keccak256(
+      abi.encode(EIP712_DOMAIN, keccak256(bytes(name)), keccak256(EIP712_REVISION), chainId, address(this))
+    );
     //_setupDecimals(decimals);
     require(owner != address(0));
     transferOwnership(owner);
   }
 
   /// @inheritdoc IERC20Permit
-  function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
-    external
-    override
-  {
+  function permit(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external override {
     require(owner != address(0), "INVALID_OWNER");
     //solium-disable-next-line
     require(block.timestamp <= deadline, "INVALID_EXPIRATION");

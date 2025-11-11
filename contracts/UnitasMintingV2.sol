@@ -33,9 +33,10 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
   bytes32 private constant ROUTE_TYPE = keccak256("Route(address[] addresses,uint128[] ratios)");
 
   /// @notice order type
-  bytes32 private constant ORDER_TYPE = keccak256(
-    "Order(string order_id,uint8 order_type,uint128 expiry,uint120 nonce,address benefactor,address beneficiary,address collateral_asset,uint128 collateral_amount,uint128 usdu_amount)"
-  );
+  bytes32 private constant ORDER_TYPE =
+    keccak256(
+      "Order(string order_id,uint8 order_type,uint128 expiry,uint120 nonce,address benefactor,address beneficiary,address collateral_asset,uint128 collateral_amount,uint128 usdu_amount)"
+    );
 
   /// @notice role enabling to invoke mint
   bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -186,7 +187,7 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
       revert InvalidAssetAddress();
     }
 
-    for (uint128 j = 0; j < _custodians.length;) {
+    for (uint128 j = 0; j < _custodians.length; ) {
       addCustodianAddress(_custodians[j]);
       unchecked {
         ++j;
@@ -197,7 +198,7 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
     globalConfig = _globalConfig;
 
     // Set the max mint/redeem limits per block for each asset
-    for (uint128 k = 0; k < _tokenConfig.length;) {
+    for (uint128 k = 0; k < _tokenConfig.length; ) {
       if (tokenConfig[_assets[k]].isActive || _assets[k] == address(0) || _assets[k] == address(usdu)) {
         revert InvalidAssetAddress();
       }
@@ -231,7 +232,11 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
    * @param order struct containing order details and confirmation from server
    * @param signature signature of the taker
    */
-  function mint(Order calldata order, Route calldata route, Signature calldata signature)
+  function mint(
+    Order calldata order,
+    Route calldata route,
+    Signature calldata signature
+  )
     external
     override
     nonReentrant
@@ -247,7 +252,11 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
     totalPerBlockPerAsset[block.number][order.collateral_asset].mintedPerBlock += order.usdu_amount;
     totalPerBlock[block.number].mintedPerBlock += order.usdu_amount;
     _transferCollateral(
-      order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
+      order.collateral_amount,
+      order.collateral_asset,
+      order.benefactor,
+      route.addresses,
+      route.ratios
     );
     usdu.mint(order.beneficiary, order.usdu_amount);
     emit Mint(
@@ -266,7 +275,11 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
    * @param order struct containing order details and confirmation from server
    * @param signature signature of the taker
    */
-  function mintWETH(Order calldata order, Route calldata route, Signature calldata signature)
+  function mintWETH(
+    Order calldata order,
+    Route calldata route,
+    Signature calldata signature
+  )
     external
     nonReentrant
     onlyRole(MINTER_ROLE)
@@ -282,7 +295,11 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
     totalPerBlock[block.number].mintedPerBlock += order.usdu_amount;
     // Checks that the collateral asset is WETH also
     _transferEthCollateral(
-      order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
+      order.collateral_amount,
+      order.collateral_asset,
+      order.benefactor,
+      route.addresses,
+      route.ratios
     );
     usdu.mint(order.beneficiary, order.usdu_amount);
     emit Mint(
@@ -301,7 +318,10 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
    * @param order struct containing order details and confirmation from server
    * @param signature signature of the taker
    */
-  function redeem(Order calldata order, Signature calldata signature)
+  function redeem(
+    Order calldata order,
+    Signature calldata signature
+  )
     external
     override
     nonReentrant
@@ -366,14 +386,14 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
   }
 
   /// @notice transfers an asset to a custody wallet
-  function transferToCustody(address wallet, address asset, uint128 amount)
-    external
-    nonReentrant
-    onlyRole(COLLATERAL_MANAGER_ROLE)
-  {
+  function transferToCustody(
+    address wallet,
+    address asset,
+    uint128 amount
+  ) external nonReentrant onlyRole(COLLATERAL_MANAGER_ROLE) {
     if (wallet == address(0) || !_custodianAddresses.contains(wallet)) revert InvalidAddress();
     if (asset == NATIVE_TOKEN) {
-      (bool success,) = wallet.call{value: amount}("");
+      (bool success, ) = wallet.call{ value: amount }("");
       if (!success) revert TransferFailed();
     } else {
       IERC20(asset).safeTransfer(wallet, amount);
@@ -477,32 +497,32 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
   }
 
   function encodeOrder(Order calldata order) public pure returns (bytes memory) {
-    return abi.encode(
-      ORDER_TYPE,
-      keccak256(bytes(order.order_id)),
-      order.order_type,
-      order.expiry,
-      order.nonce,
-      order.benefactor,
-      order.beneficiary,
-      order.collateral_asset,
-      order.collateral_amount,
-      order.usdu_amount
-    );
+    return
+      abi.encode(
+        ORDER_TYPE,
+        keccak256(bytes(order.order_id)),
+        order.order_type,
+        order.expiry,
+        order.nonce,
+        order.benefactor,
+        order.beneficiary,
+        order.collateral_asset,
+        order.collateral_amount,
+        order.usdu_amount
+      );
   }
 
   /// @notice assert validity of signed order
-  function verifyOrder(Order calldata order, Signature calldata signature)
-    public
-    view
-    override
-    returns (bytes32 taker_order_hash)
-  {
+  function verifyOrder(
+    Order calldata order,
+    Signature calldata signature
+  ) public view override returns (bytes32 taker_order_hash) {
     taker_order_hash = hashOrder(order);
     if (signature.signature_type == SignatureType.EIP712) {
       address signer = ECDSA.recover(taker_order_hash, signature.signature_bytes);
-      if (!(signer == order.benefactor || delegatedSigner[signer][order.benefactor] == DelegatedSignerStatus.ACCEPTED))
-      {
+      if (
+        !(signer == order.benefactor || delegatedSigner[signer][order.benefactor] == DelegatedSignerStatus.ACCEPTED)
+      ) {
         revert InvalidEIP712Signature();
       }
     } else if (signature.signature_type == SignatureType.EIP1271) {
@@ -542,9 +562,10 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
     if (route.addresses.length == 0) {
       return false;
     }
-    for (uint128 i = 0; i < route.addresses.length;) {
-      if (!_custodianAddresses.contains(route.addresses[i]) || route.addresses[i] == address(0) || route.ratios[i] == 0)
-      {
+    for (uint128 i = 0; i < route.addresses.length; ) {
+      if (
+        !_custodianAddresses.contains(route.addresses[i]) || route.addresses[i] == address(0) || route.ratios[i] == 0
+      ) {
         return false;
       }
       totalRatio += route.ratios[i];
@@ -582,8 +603,9 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
         : 10 ** (collateralDecimals - usduDecimals)
     );
 
-    normalizedCollateralAmount =
-      usduDecimals > collateralDecimals ? collateralAmount * scale : collateralAmount / scale;
+    normalizedCollateralAmount = usduDecimals > collateralDecimals
+      ? collateralAmount * scale
+      : collateralAmount / scale;
 
     uint128 difference = normalizedCollateralAmount > usduAmount
       ? normalizedCollateralAmount - usduAmount
@@ -612,7 +634,7 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
   function _transferToBeneficiary(address beneficiary, address asset, uint128 amount) internal {
     if (asset == NATIVE_TOKEN) {
       if (address(this).balance < amount) revert InvalidAmount();
-      (bool success,) = (beneficiary).call{value: amount}("");
+      (bool success, ) = (beneficiary).call{ value: amount }("");
       if (!success) revert TransferFailed();
     } else {
       if (!tokenConfig[asset].isActive) revert UnsupportedAsset();
@@ -632,7 +654,7 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
     if (!tokenConfig[asset].isActive || asset == NATIVE_TOKEN) revert UnsupportedAsset();
     IERC20 token = IERC20(asset);
     uint128 totalTransferred = 0;
-    for (uint128 i = 0; i < addresses.length;) {
+    for (uint128 i = 0; i < addresses.length; ) {
       uint128 amountToTransfer = (amount * ratios[i]) / ROUTE_REQUIRED_RATIO;
       token.safeTransferFrom(benefactor, addresses[i], amountToTransfer);
       totalTransferred += amountToTransfer;
@@ -661,9 +683,9 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
     WETH.withdraw(amount);
 
     uint128 totalTransferred = 0;
-    for (uint128 i = 0; i < addresses.length;) {
+    for (uint128 i = 0; i < addresses.length; ) {
       uint128 amountToTransfer = (amount * ratios[i]) / ROUTE_REQUIRED_RATIO;
-      (bool success,) = addresses[i].call{value: amountToTransfer}("");
+      (bool success, ) = addresses[i].call{ value: amountToTransfer }("");
       if (!success) revert TransferFailed();
       totalTransferred += amountToTransfer;
       unchecked {
@@ -672,7 +694,7 @@ contract UnitasMintingV2 is IUnitasMintingV2, SingleAdminAccessControl, Reentran
     }
     uint128 remainingBalance = amount - totalTransferred;
     if (remainingBalance > 0) {
-      (bool success,) = addresses[addresses.length - 1].call{value: remainingBalance}("");
+      (bool success, ) = addresses[addresses.length - 1].call{ value: remainingBalance }("");
       if (!success) revert TransferFailed();
     }
   }

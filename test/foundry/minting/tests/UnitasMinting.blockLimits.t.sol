@@ -37,10 +37,13 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
     UnitasMintingContract.mint(bOrder, bRoute, bTakerSignature);
 
     assertEq(
-      UnitasMintingContract.mintedPerBlock(block.number), firstMintAmount + secondMintAmount, "Incorrect minted amount"
+      UnitasMintingContract.mintedPerBlock(block.number),
+      firstMintAmount + secondMintAmount,
+      "Incorrect minted amount"
     );
     assertTrue(
-      UnitasMintingContract.mintedPerBlock(block.number) < maxMintAmount, "Mint amount exceeded without revert"
+      UnitasMintingContract.mintedPerBlock(block.number) < maxMintAmount,
+      "Mint amount exceeded without revert"
     );
   }
 
@@ -90,7 +93,9 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
     vm.roll(block.number + 1);
 
     assertEq(
-      UnitasMintingContract.mintedPerBlock(block.number), 0, "The minted amount should reset to 0 in the next block"
+      UnitasMintingContract.mintedPerBlock(block.number),
+      0,
+      "The minted amount should reset to 0 in the next block"
     );
   }
 
@@ -119,8 +124,12 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
     uint256 firstRedeemAmount = maxRedeemAmount / 4;
     uint256 secondRedeemAmount = maxRedeemAmount / 2;
 
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) =
-      redeem_setup(firstRedeemAmount, _stETHToDeposit, 1, false);
+    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+      firstRedeemAmount,
+      _stETHToDeposit,
+      1,
+      false
+    );
 
     vm.prank(redeemer);
     UnitasMintingContract.redeem(redeemOrder, takerSignature2);
@@ -128,8 +137,12 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
     vm.prank(owner);
     stETHToken.mint(_stETHToDeposit, benefactor);
 
-    (IUnitasMinting.Order memory bRedeemOrder, IUnitasMinting.Signature memory bTakerSignature2) =
-      redeem_setup(secondRedeemAmount, _stETHToDeposit, 2, true);
+    (IUnitasMinting.Order memory bRedeemOrder, IUnitasMinting.Signature memory bTakerSignature2) = redeem_setup(
+      secondRedeemAmount,
+      _stETHToDeposit,
+      2,
+      true
+    );
 
     vm.prank(redeemer);
     UnitasMintingContract.redeem(bRedeemOrder, bTakerSignature2);
@@ -140,7 +153,8 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
       "Incorrect minted amount"
     );
     assertTrue(
-      UnitasMintingContract.redeemedPerBlock(block.number) < maxRedeemAmount, "Redeem amount exceeded without revert"
+      UnitasMintingContract.redeemedPerBlock(block.number) < maxRedeemAmount,
+      "Redeem amount exceeded without revert"
     );
   }
 
@@ -152,8 +166,12 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
     vm.prank(owner);
     UnitasMintingContract.setMaxMintPerBlock(excessiveRedeemAmount);
 
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) =
-      redeem_setup(excessiveRedeemAmount, _stETHToDeposit, 1, false);
+    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+      excessiveRedeemAmount,
+      _stETHToDeposit,
+      1,
+      false
+    );
 
     vm.startPrank(redeemer);
     vm.expectRevert(MaxRedeemPerBlockExceeded);
@@ -168,8 +186,12 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
 
   function test_fuzz_nextBlock_redeem_is_zero(uint256 redeemAmount) public {
     vm.assume(redeemAmount < UnitasMintingContract.maxRedeemPerBlock() && redeemAmount > 0);
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) =
-      redeem_setup(redeemAmount, _stETHToDeposit, 1, false);
+    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+      redeemAmount,
+      _stETHToDeposit,
+      1,
+      false
+    );
 
     vm.startPrank(redeemer);
     UnitasMintingContract.redeem(redeemOrder, takerSignature2);
@@ -177,7 +199,9 @@ contract UnitasMintingBlockLimitsTest is UnitasMintingUtils {
     vm.roll(block.number + 1);
 
     assertEq(
-      UnitasMintingContract.redeemedPerBlock(block.number), 0, "The redeemed amount should reset to 0 in the next block"
+      UnitasMintingContract.redeemedPerBlock(block.number),
+      0,
+      "The redeemed amount should reset to 0 in the next block"
     );
     vm.stopPrank();
   }

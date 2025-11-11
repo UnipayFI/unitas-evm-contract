@@ -6,9 +6,9 @@ pragma solidity >=0.8.19;
  */
 
 import "forge-std/Vm.sol";
-import {StdUtils} from "forge-std/StdUtils.sol";
-import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import { StdUtils } from "forge-std/StdUtils.sol";
+import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract DeploymentUtils is StdUtils {
   error USER_NOT_OWNER();
@@ -37,10 +37,10 @@ contract DeploymentUtils is StdUtils {
     return deployment;
   }
 
-  function _deployFromArtifactsWithBroadcast(string memory contractPath, bytes memory args)
-    internal
-    returns (address deployment)
-  {
+  function _deployFromArtifactsWithBroadcast(
+    string memory contractPath,
+    bytes memory args
+  ) internal returns (address deployment) {
     bytes memory bytecode = abi.encodePacked(vm.getCode(contractPath), args);
 
     vm.broadcast();
@@ -51,10 +51,11 @@ contract DeploymentUtils is StdUtils {
     return deployment;
   }
 
-  function _deployCreate2FromArtifactsWithBroadcast(string memory contractPath, bytes memory args, uint256 salt)
-    internal
-    returns (address deployment)
-  {
+  function _deployCreate2FromArtifactsWithBroadcast(
+    string memory contractPath,
+    bytes memory args,
+    uint256 salt
+  ) internal returns (address deployment) {
     bytes memory bytecode = abi.encodePacked(vm.getCode(contractPath), args);
 
     vm.broadcast();
@@ -74,10 +75,11 @@ contract DeploymentUtils is StdUtils {
     return deployment;
   }
 
-  function _create2Deploy(bytes32 salt, bytes memory bytecode, bytes memory constructorParams)
-    internal
-    returns (address)
-  {
+  function _create2Deploy(
+    bytes32 salt,
+    bytes memory bytecode,
+    bytes memory constructorParams
+  ) internal returns (address) {
     if (_isContractDeployed(CREATE2_FACTORY) == false) {
       revert("MISSING CREATE2_FACTORY");
     }
@@ -104,7 +106,9 @@ contract DeploymentUtils is StdUtils {
     assembly {
       addr := create2(0, add(bytecode, 0x20), mload(bytecode), _salt)
 
-      if iszero(extcodesize(addr)) { revert(0, 0) }
+      if iszero(extcodesize(addr)) {
+        revert(0, 0)
+      }
     }
   }
 

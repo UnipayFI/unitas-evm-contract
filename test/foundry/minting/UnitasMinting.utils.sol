@@ -31,8 +31,12 @@ contract UnitasMintingUtils is MintingBaseSetup {
     vm.prank(owner);
     UnitasMintingContract.setMaxMintPerBlock(excessiveRedeemAmount);
 
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) =
-      redeem_setup(excessiveRedeemAmount, _stETHToDeposit, 1, false);
+    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+      excessiveRedeemAmount,
+      _stETHToDeposit,
+      1,
+      false
+    );
 
     vm.startPrank(redeemer);
     vm.expectRevert(MaxRedeemPerBlockExceeded);
@@ -57,8 +61,12 @@ contract UnitasMintingUtils is MintingBaseSetup {
   }
 
   function executeRedeem() public {
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) =
-      redeem_setup(_usduToMint, _stETHToDeposit, 1, false);
+    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+      _usduToMint,
+      _stETHToDeposit,
+      1,
+      false
+    );
     vm.prank(redeemer);
     UnitasMintingContract.redeem(redeemOrder, takerSignature2);
   }

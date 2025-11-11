@@ -2,9 +2,12 @@
 pragma solidity ^0.8.0;
 
 interface ISwapper {
-  function swap(address _tokenIn, address _tokenOut, uint256 _amountIn, address _to)
-    external
-    returns (uint256 amountOut);
+  function swap(
+    address _tokenIn,
+    address _tokenOut,
+    uint256 _amountIn,
+    address _to
+  ) external returns (uint256 amountOut);
 
   function swapExactTokensForETH(
     uint256 amountIn,
@@ -22,8 +25,9 @@ interface ISwapper {
     uint256 deadline
   ) external payable returns (uint256 amount);
 
-  function estimateSwap(address _tokenIn, address _tokenOut, uint256 _amountIn)
-    external
-    view
-    returns (uint256 amountOut);
+  function estimateSwap(
+    address _tokenIn,
+    address _tokenOut,
+    uint256 _amountIn
+  ) external view returns (uint256 amountOut);
 }

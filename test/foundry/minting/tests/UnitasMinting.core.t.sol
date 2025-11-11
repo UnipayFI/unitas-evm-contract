@@ -26,8 +26,12 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     vm.prank(owner);
     UnitasMintingContract.setMaxRedeemPerBlock(type(uint256).max);
 
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) =
-      redeem_setup(_usduToMint, _stETHToDeposit, 1, false);
+    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+      _usduToMint,
+      _stETHToDeposit,
+      1,
+      false
+    );
 
     vm.startPrank(redeemer);
     UnitasMintingContract.redeem(redeemOrder, takerSignature2);
@@ -56,15 +60,18 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     uint256[] memory ratios = new uint256[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature =
-      signOrder(benefactorPrivateKey, digest1, IUnitasMinting.SignatureType.EIP712);
+    IUnitasMinting.Signature memory takerSignature = signOrder(
+      benefactorPrivateKey,
+      digest1,
+      IUnitasMinting.SignatureType.EIP712
+    );
     vm.stopPrank();
 
     assertEq(usduToken.balanceOf(benefactor), 0);
@@ -93,8 +100,11 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     usduToken.approve(address(UnitasMintingContract), _usduToMint);
 
     bytes32 digest3 = UnitasMintingContract.hashOrder(redeemOrder);
-    IUnitasMinting.Signature memory takerSignature2 =
-      signOrder(benefactorPrivateKey, digest3, IUnitasMinting.SignatureType.EIP712);
+    IUnitasMinting.Signature memory takerSignature2 = signOrder(
+      benefactorPrivateKey,
+      digest3,
+      IUnitasMinting.SignatureType.EIP712
+    );
     vm.stopPrank();
 
     vm.startPrank(redeemer);
@@ -148,15 +158,18 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     ratios[1] = 4_000;
     ratios[2] = 3_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature =
-      signOrder(benefactorPrivateKey, digest1, IUnitasMinting.SignatureType.EIP712);
+    IUnitasMinting.Signature memory takerSignature = signOrder(
+      benefactorPrivateKey,
+      digest1,
+      IUnitasMinting.SignatureType.EIP712
+    );
     vm.stopPrank();
 
     assertEq(stETHToken.balanceOf(benefactor), _stETHToDeposit);
@@ -210,14 +223,17 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     ratios[0] = ratio1;
     ratios[1] = 7_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(mintOrder);
-    IUnitasMinting.Signature memory takerSignature =
-      signOrder(benefactorPrivateKey, digest1, IUnitasMinting.SignatureType.EIP712);
+    IUnitasMinting.Signature memory takerSignature = signOrder(
+      benefactorPrivateKey,
+      digest1,
+      IUnitasMinting.SignatureType.EIP712
+    );
     vm.stopPrank();
 
     assertEq(stETHToken.balanceOf(benefactor), _stETHToDeposit);
@@ -253,15 +269,18 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     uint256[] memory ratios = new uint256[](1);
     ratios[0] = ratio1;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature =
-      signOrder(benefactorPrivateKey, digest1, IUnitasMinting.SignatureType.EIP712);
+    IUnitasMinting.Signature memory takerSignature = signOrder(
+      benefactorPrivateKey,
+      digest1,
+      IUnitasMinting.SignatureType.EIP712
+    );
     vm.stopPrank();
 
     assertEq(stETHToken.balanceOf(benefactor), _stETHToDeposit);
@@ -299,15 +318,18 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     uint256[] memory ratios = new uint256[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature =
-      signOrder(benefactorPrivateKey, digest1, IUnitasMinting.SignatureType.EIP712);
+    IUnitasMinting.Signature memory takerSignature = signOrder(
+      benefactorPrivateKey,
+      digest1,
+      IUnitasMinting.SignatureType.EIP712
+    );
     vm.stopPrank();
 
     vm.recordLogs();
@@ -339,15 +361,18 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     uint256[] memory ratios = new uint256[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature =
-      signOrder(benefactorPrivateKey, digest1, IUnitasMinting.SignatureType.EIP712);
+    IUnitasMinting.Signature memory takerSignature = signOrder(
+      benefactorPrivateKey,
+      digest1,
+      IUnitasMinting.SignatureType.EIP712
+    );
     vm.stopPrank();
 
     vm.recordLogs();
@@ -421,8 +446,12 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
   }
 
   function test_sending_redeem_order_to_mint_revert() public {
-    (IUnitasMinting.Order memory order, IUnitasMinting.Signature memory takerSignature) =
-      redeem_setup(1 ether, 50 ether, 20, false);
+    (IUnitasMinting.Order memory order, IUnitasMinting.Signature memory takerSignature) = redeem_setup(
+      1 ether,
+      50 ether,
+      20,
+      false
+    );
 
     address[] memory targets = new address[](1);
     targets[0] = address(UnitasMintingContract);
@@ -430,7 +459,7 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     uint256[] memory ratios = new uint256[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     vm.expectRevert(InvalidOrder);
     vm.prank(minter);
@@ -438,8 +467,12 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
   }
 
   function test_sending_mint_order_to_redeem_revert() public {
-    (IUnitasMinting.Order memory order, IUnitasMinting.Signature memory takerSignature,) =
-      mint_setup(1 ether, 50 ether, 20, false);
+    (IUnitasMinting.Order memory order, IUnitasMinting.Signature memory takerSignature, ) = mint_setup(
+      1 ether,
+      50 ether,
+      20,
+      false
+    );
 
     vm.expectRevert(InvalidOrder);
     vm.prank(redeemer);
@@ -450,7 +483,7 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     assertEq(address(UnitasMintingContract).balance, 0);
     vm.deal(owner, 10_000 ether);
     vm.prank(owner);
-    (bool success,) = address(UnitasMintingContract).call{value: 10_000 ether}("");
+    (bool success, ) = address(UnitasMintingContract).call{ value: 10_000 ether }("");
     assertTrue(success);
     assertEq(address(UnitasMintingContract).balance, 10_000 ether);
   }

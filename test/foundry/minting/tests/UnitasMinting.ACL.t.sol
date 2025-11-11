@@ -25,14 +25,21 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
   }
 
   function test_redeem_notRedeemer_revert() public {
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) =
-      redeem_setup(_usduToMint, _stETHToDeposit, 1, false);
+    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+      _usduToMint,
+      _stETHToDeposit,
+      1,
+      false
+    );
 
     vm.startPrank(minter);
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(minter), " is missing role ", vm.toString(redeemerRole)
+          "AccessControl: account ",
+          Strings.toHexString(minter),
+          " is missing role ",
+          vm.toString(redeemerRole)
         )
       )
     );
@@ -51,7 +58,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(nonMinter), " is missing role ", vm.toString(minterRole)
+          "AccessControl: account ",
+          Strings.toHexString(nonMinter),
+          " is missing role ",
+          vm.toString(minterRole)
         )
       )
     );
@@ -105,7 +115,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(nonMinter), " is missing role ", vm.toString(minterRole)
+          "AccessControl: account ",
+          Strings.toHexString(nonMinter),
+          " is missing role ",
+          vm.toString(minterRole)
         )
       )
     );
@@ -169,7 +182,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(gatekeeper), " is missing role ", vm.toString(adminRole)
+          "AccessControl: account ",
+          Strings.toHexString(gatekeeper),
+          " is missing role ",
+          vm.toString(adminRole)
         )
       )
     );
@@ -274,7 +290,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+          "AccessControl: account ",
+          Strings.toHexString(notAdmin),
+          " is missing role ",
+          vm.toString(adminRole)
         )
       )
     );
@@ -294,7 +313,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+          "AccessControl: account ",
+          Strings.toHexString(notAdmin),
+          " is missing role ",
+          vm.toString(adminRole)
         )
       )
     );
@@ -367,7 +389,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+          "AccessControl: account ",
+          Strings.toHexString(notAdmin),
+          " is missing role ",
+          vm.toString(adminRole)
         )
       )
     );
@@ -385,7 +410,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+          "AccessControl: account ",
+          Strings.toHexString(notAdmin),
+          " is missing role ",
+          vm.toString(adminRole)
         )
       )
     );
@@ -402,7 +430,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+          "AccessControl: account ",
+          Strings.toHexString(notAdmin),
+          " is missing role ",
+          vm.toString(adminRole)
         )
       )
     );
@@ -418,7 +449,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.expectRevert(
       bytes(
         string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+          "AccessControl: account ",
+          Strings.toHexString(notAdmin),
+          " is missing role ",
+          vm.toString(adminRole)
         )
       )
     );
@@ -638,8 +672,14 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
   }
 
   function testCorrectInitConfig() public {
-    UnitasMinting unitasMinting2 =
-      new UnitasMinting(IUSDu(address(usduToken)), assets, custodians, randomer, _maxMintPerBlock, _maxRedeemPerBlock);
+    UnitasMinting unitasMinting2 = new UnitasMinting(
+      IUSDu(address(usduToken)),
+      assets,
+      custodians,
+      randomer,
+      _maxMintPerBlock,
+      _maxRedeemPerBlock
+    );
     assertFalse(unitasMinting2.hasRole(adminRole, owner));
     assertNotEq(unitasMinting2.owner(), owner);
     assertTrue(unitasMinting2.hasRole(adminRole, randomer));

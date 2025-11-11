@@ -9,10 +9,12 @@ import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 contract MockToken is ERC20, ERC20Permit {
   uint8 private __decimals;
 
-  constructor(string memory name, string memory symbol, uint8 _decimals, address owner)
-    ERC20(name, symbol)
-    ERC20Permit(name)
-  {
+  constructor(
+    string memory name,
+    string memory symbol,
+    uint8 _decimals,
+    address owner
+  ) ERC20(name, symbol) ERC20Permit(name) {
     __decimals = _decimals;
     require(owner != address(0), "Zero address not valid");
 

@@ -31,9 +31,10 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
   bytes32 private constant ROUTE_TYPE = keccak256("Route(address[] addresses,uint256[] ratios)");
 
   /// @notice order type
-  bytes32 private constant ORDER_TYPE = keccak256(
-    "Order(uint8 order_type,uint256 expiry,uint256 nonce,address benefactor,address beneficiary,address collateral_asset,uint256 collateral_amount,uint256 usdu_amount)"
-  );
+  bytes32 private constant ORDER_TYPE =
+    keccak256(
+      "Order(uint8 order_type,uint256 expiry,uint256 nonce,address benefactor,address beneficiary,address collateral_asset,uint256 collateral_amount,uint256 usdu_amount)"
+    );
 
   /// @notice role enabling to invoke mint
   bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -158,13 +159,11 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
    * @param order struct containing order details and confirmation from server
    * @param signature signature of the taker
    */
-  function mint(Order calldata order, Route calldata route, Signature calldata signature)
-    external
-    override
-    nonReentrant
-    onlyRole(MINTER_ROLE)
-    belowMaxMintPerBlock(order.usdu_amount)
-  {
+  function mint(
+    Order calldata order,
+    Route calldata route,
+    Signature calldata signature
+  ) external override nonReentrant onlyRole(MINTER_ROLE) belowMaxMintPerBlock(order.usdu_amount) {
     if (order.order_type != OrderType.MINT) revert InvalidOrder();
     verifyOrder(order, signature);
     if (!verifyRoute(route, order.order_type)) revert InvalidRoute();
@@ -172,7 +171,11 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
     // Add to the minted amount in this block
     mintedPerBlock[block.number] += order.usdu_amount;
     _transferCollateral(
-      order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
+      order.collateral_amount,
+      order.collateral_asset,
+      order.benefactor,
+      route.addresses,
+      route.ratios
     );
     usdu.mint(order.beneficiary, order.usdu_amount);
     emit Mint(
@@ -190,13 +193,10 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
    * @param order struct containing order details and confirmation from server
    * @param signature signature of the taker
    */
-  function redeem(Order calldata order, Signature calldata signature)
-    external
-    override
-    nonReentrant
-    onlyRole(REDEEMER_ROLE)
-    belowMaxRedeemPerBlock(order.usdu_amount)
-  {
+  function redeem(
+    Order calldata order,
+    Signature calldata signature
+  ) external override nonReentrant onlyRole(REDEEMER_ROLE) belowMaxRedeemPerBlock(order.usdu_amount) {
     if (order.order_type != OrderType.REDEEM) revert InvalidOrder();
     verifyOrder(order, signature);
     if (!_deduplicateOrder(order.benefactor, order.nonce)) revert Duplicate();
@@ -243,10 +243,14 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
   }
 
   /// @notice transfers an asset to a custody wallet
-  function transferToCustody(address wallet, address asset, uint256 amount) external nonReentrant onlyRole(MINTER_ROLE) {
+  function transferToCustody(
+    address wallet,
+    address asset,
+    uint256 amount
+  ) external nonReentrant onlyRole(MINTER_ROLE) {
     if (wallet == address(0) || !_custodianAddresses.contains(wallet)) revert InvalidAddress();
     if (asset == NATIVE_TOKEN) {
-      (bool success,) = wallet.call{value: amount}("");
+      (bool success, ) = wallet.call{ value: amount }("");
       if (!success) revert TransferFailed();
     } else {
       IERC20(asset).safeTransfer(wallet, amount);
@@ -317,17 +321,18 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
   }
 
   function encodeOrder(Order calldata order) public pure returns (bytes memory) {
-    return abi.encode(
-      ORDER_TYPE,
-      order.order_type,
-      order.expiry,
-      order.nonce,
-      order.benefactor,
-      order.beneficiary,
-      order.collateral_asset,
-      order.collateral_amount,
-      order.usdu_amount
-    );
+    return
+      abi.encode(
+        ORDER_TYPE,
+        order.order_type,
+        order.expiry,
+        order.nonce,
+        order.benefactor,
+        order.beneficiary,
+        order.collateral_asset,
+        order.collateral_amount,
+        order.usdu_amount
+      );
   }
 
   function encodeRoute(Route calldata route) public pure returns (bytes memory) {
@@ -335,7 +340,10 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
   }
 
   /// @notice assert validity of signed order
-  function verifyOrder(Order calldata order, Signature calldata signature) public view override returns (bool, bytes32) {
+  function verifyOrder(
+    Order calldata order,
+    Signature calldata signature
+  ) public view override returns (bool, bytes32) {
     bytes32 taker_order_hash = hashOrder(order);
     address signer = ECDSA.recover(taker_order_hash, signature.signature_bytes);
     if (!(signer == order.benefactor || delegatedSigner[signer][order.benefactor])) revert InvalidSignature();
@@ -360,8 +368,9 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
       return false;
     }
     for (uint256 i = 0; i < route.addresses.length; ++i) {
-      if (!_custodianAddresses.contains(route.addresses[i]) || route.addresses[i] == address(0) || route.ratios[i] == 0)
-      {
+      if (
+        !_custodianAddresses.contains(route.addresses[i]) || route.addresses[i] == address(0) || route.ratios[i] == 0
+      ) {
         return false;
       }
       totalRatio += route.ratios[i];
@@ -400,7 +409,7 @@ contract UnitasMinting is IUnitasMinting, SingleAdminAccessControl, ReentrancyGu
   function _transferToBeneficiary(address beneficiary, address asset, uint256 amount) internal {
     if (asset == NATIVE_TOKEN) {
       if (address(this).balance < amount) revert InvalidAmount();
-      (bool success,) = (beneficiary).call{value: amount}("");
+      (bool success, ) = (beneficiary).call{ value: amount }("");
       if (!success) revert TransferFailed();
     } else {
       if (!_supportedAssets.contains(asset)) revert UnsupportedAsset();

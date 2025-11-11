@@ -66,11 +66,11 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    * @param _owner The address of the admin role.
    *
    */
-  constructor(IERC20 _asset, address _initialRewarder, address _owner)
-    ERC20("Staked USDu", "sUSDu")
-    ERC4626(_asset)
-    ERC20Permit("sUSDu")
-  {
+  constructor(
+    IERC20 _asset,
+    address _initialRewarder,
+    address _owner
+  ) ERC20("Staked USDu", "sUSDu") ERC4626(_asset) ERC20Permit("sUSDu") {
     if (_owner == address(0) || _initialRewarder == address(0) || address(_asset) == address(0)) {
       revert InvalidZeroAddress();
     }
@@ -102,11 +102,10 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    * @param target The address to blacklist.
    * @param isFullBlacklisting Soft or full blacklisting level.
    */
-  function addToBlacklist(address target, bool isFullBlacklisting)
-    external
-    onlyRole(BLACKLIST_MANAGER_ROLE)
-    notOwner(target)
-  {
+  function addToBlacklist(
+    address target,
+    bool isFullBlacklisting
+  ) external onlyRole(BLACKLIST_MANAGER_ROLE) notOwner(target) {
     bytes32 role = isFullBlacklisting ? FULL_RESTRICTED_STAKER_ROLE : SOFT_RESTRICTED_STAKER_ROLE;
     _grantRole(role, target);
   }
@@ -116,11 +115,10 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    * @param target The address to un-blacklist.
    * @param isFullBlacklisting Soft or full blacklisting level.
    */
-  function removeFromBlacklist(address target, bool isFullBlacklisting)
-    external
-    onlyRole(BLACKLIST_MANAGER_ROLE)
-    notOwner(target)
-  {
+  function removeFromBlacklist(
+    address target,
+    bool isFullBlacklisting
+  ) external onlyRole(BLACKLIST_MANAGER_ROLE) notOwner(target) {
     bytes32 role = isFullBlacklisting ? FULL_RESTRICTED_STAKER_ROLE : SOFT_RESTRICTED_STAKER_ROLE;
     _revokeRole(role, target);
   }
@@ -199,13 +197,12 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    * @param assets assets to deposit
    * @param shares shares to mint
    */
-  function _deposit(address caller, address receiver, uint256 assets, uint256 shares)
-    internal
-    override
-    nonReentrant
-    notZero(assets)
-    notZero(shares)
-  {
+  function _deposit(
+    address caller,
+    address receiver,
+    uint256 assets,
+    uint256 shares
+  ) internal override nonReentrant notZero(assets) notZero(shares) {
     if (
       hasRole(SOFT_RESTRICTED_STAKER_ROLE, caller) ||
       hasRole(SOFT_RESTRICTED_STAKER_ROLE, receiver) ||
@@ -225,13 +222,13 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    * @param assets asset amount to transfer out
    * @param shares shares to burn
    */
-  function _withdraw(address caller, address receiver, address _owner, uint256 assets, uint256 shares)
-    internal
-    override
-    nonReentrant
-    notZero(assets)
-    notZero(shares)
-  {
+  function _withdraw(
+    address caller,
+    address receiver,
+    address _owner,
+    uint256 assets,
+    uint256 shares
+  ) internal override nonReentrant notZero(assets) notZero(shares) {
     if (
       hasRole(FULL_RESTRICTED_STAKER_ROLE, caller) ||
       hasRole(FULL_RESTRICTED_STAKER_ROLE, receiver) ||
