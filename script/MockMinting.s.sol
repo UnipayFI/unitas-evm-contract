@@ -60,8 +60,7 @@ contract UnitasMintingV2MockScript is Script {
   function mint_setup(
     uint256 usduAmount,
     uint256 collateralAmount,
-    uint256 nonce,
-    bool multipleMints
+    uint256 nonce
   )
     public
     returns (
@@ -74,7 +73,7 @@ contract UnitasMintingV2MockScript is Script {
       order_id: "10",
       order_type: IUnitasMintingV2.OrderType.MINT,
       nonce: uint128(nonce),
-      expiry: uint120(1747613882),
+      expiry: uint120(block.timestamp + 10 minutes),
       benefactor: benefactor,
       beneficiary: beneficiary,
       collateral_asset: collateral_asset,
@@ -99,12 +98,6 @@ contract UnitasMintingV2MockScript is Script {
     console.logBytes(takerSignature.signature_bytes);
     collateral_token.approve(address(UnitasMintingContract), collateralAmount);
     vm.stopPrank();
-
-    if (!multipleMints) {
-      require(usduToken.balanceOf(beneficiary) == 0, "Mismatch in USDu balance");
-      require(collateral_token.balanceOf(address(UnitasMintingContract)) == 0, "Mismatch in mockToken balance");
-      require(collateral_token.balanceOf(benefactor) == collateralAmount, "Mismatch in mockToken balance");
-    }
   }
 
   function run() public {
@@ -115,7 +108,7 @@ contract UnitasMintingV2MockScript is Script {
       IUnitasMintingV2.Order memory mintOrder,
       IUnitasMintingV2.Signature memory takerSignature,
       IUnitasMintingV2.Route memory route
-    ) = mint_setup(usduAmount, collateralAmount, nonce, true);
+    ) = mint_setup(usduAmount, collateralAmount, nonce);
 
     vm.startPrank(benefactor);
     UnitasMintingContract.mint(mintOrder, route, takerSignature);
