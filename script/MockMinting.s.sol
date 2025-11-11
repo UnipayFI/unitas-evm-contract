@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Script.sol";
+import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "../contracts/UnitasMintingV2.sol";
@@ -72,8 +73,8 @@ contract UnitasMintingV2MockScript is Script {
     order = IUnitasMintingV2.Order({
       order_id: "10",
       order_type: IUnitasMintingV2.OrderType.MINT,
-      expiry: uint120(block.timestamp + 10 minutes),
       nonce: uint128(nonce),
+      expiry: uint120(1747613882),
       benefactor: benefactor,
       beneficiary: beneficiary,
       collateral_asset: collateral_asset,
@@ -91,7 +92,11 @@ contract UnitasMintingV2MockScript is Script {
 
     vm.startPrank(benefactor);
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
+    console.log("digest:");
+    console.logBytes32(digest1);
     takerSignature = signOrder(benefactorPrivateKey, digest1, IUnitasMintingV2.SignatureType.EIP712);
+    console.log("signature:");
+    console.logBytes(takerSignature.signature_bytes);
     collateral_token.approve(address(UnitasMintingContract), collateralAmount);
     vm.stopPrank();
 
@@ -105,7 +110,7 @@ contract UnitasMintingV2MockScript is Script {
   function run() public {
     uint256 usduAmount = 1;
     uint256 collateralAmount = 1;
-    uint256 nonce = 100;
+    uint256 nonce = 1747613582964;
     (
       IUnitasMintingV2.Order memory mintOrder,
       IUnitasMintingV2.Signature memory takerSignature,
