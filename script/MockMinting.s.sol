@@ -11,6 +11,7 @@ import "../contracts/mock/MockToken.sol";
 contract UnitasMintingV2MockScript is Script {
   address benefactor = 0x9F0cfD25ACe49057691948E4EAD7044CCc52d050;
   address minter = 0x9F0cfD25ACe49057691948E4EAD7044CCc52d050;
+  address redeemer = 0x9F0cfD25ACe49057691948E4EAD7044CCc52d050;
   address beneficiary = 0x9F0cfD25ACe49057691948E4EAD7044CCc52d050;
   address collateral_asset = 0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142;
   MockToken collateral_token = MockToken(0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142);
@@ -18,6 +19,10 @@ contract UnitasMintingV2MockScript is Script {
   UnitasMintingV2 public UnitasMintingContract = UnitasMintingV2(payable(0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03));
 
   uint256 benefactorPrivateKey;
+  uint256 beneficiaryPrivateKey;
+
+  string constant ORDER_ID_PREFIX = "RFQ-";
+  bytes constant ALPHANUMERIC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
   function setUp() public {
     // forkId
@@ -27,6 +32,7 @@ contract UnitasMintingV2MockScript is Script {
     vm.selectFork(forkId);
 
     benefactorPrivateKey = vm.envUint("MOCK_PRIVATE_KEY");
+    beneficiaryPrivateKey = vm.envUint("MOCK_PRIVATE_KEY");
   }
 
   /// @notice packs r, s, v into signature bytes
@@ -54,6 +60,16 @@ contract UnitasMintingV2MockScript is Script {
     });
 
     return signature;
+  }
+
+  function generateRandomOrderId() internal view returns (string memory) {
+    bytes memory randomChars = new bytes(13);
+    for (uint256 i = 0; i < 13; i++) {
+      uint256 randomIndex = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, i))) %
+        ALPHANUMERIC.length;
+      randomChars[i] = ALPHANUMERIC[randomIndex];
+    }
+    return string(abi.encodePacked(ORDER_ID_PREFIX, randomChars));
   }
 
   // Generic mint setup reused in the tests to reduce lines of code
@@ -100,7 +116,7 @@ contract UnitasMintingV2MockScript is Script {
     vm.stopPrank();
   }
 
-  function run() public {
+  function execute_mint() internal {
     uint256 usduAmount = 1;
     uint256 collateralAmount = 1;
     uint256 nonce = 1747613582964;
@@ -110,8 +126,56 @@ contract UnitasMintingV2MockScript is Script {
       IUnitasMintingV2.Route memory route
     ) = mint_setup(usduAmount, collateralAmount, nonce);
 
-    vm.startPrank(benefactor);
+    vm.startPrank(minter);
     UnitasMintingContract.mint(mintOrder, route, takerSignature);
     vm.stopPrank();
+  }
+
+  function redeem_setup(
+    uint256 usduAmount,
+    uint256 collateralAmount,
+    uint256 nonce
+  ) public returns (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) {
+    //redeem
+    redeemOrder = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.REDEEM,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(uint128(block.timestamp + 10 minutes)),
+      nonce: uint128(nonce + 1),
+      benefactor: beneficiary,
+      beneficiary: beneficiary,
+      collateral_asset: address(collateral_asset),
+      usdu_amount: uint128(usduAmount),
+      collateral_amount: uint128(collateralAmount)
+    });
+
+    // taker
+    vm.startPrank(beneficiary);
+    usduToken.approve(address(UnitasMintingContract), usduAmount);
+
+    bytes32 digest3 = UnitasMintingContract.hashOrder(redeemOrder);
+    takerSignature2 = signOrder(beneficiaryPrivateKey, digest3, IUnitasMintingV2.SignatureType.EIP712);
+    vm.stopPrank();
+  }
+
+  function execute_redeem() internal {
+    uint256 usduAmount = 1;
+    uint256 collateralAmount = 1;
+    uint256 nonce = 1747613582964;
+    (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) = redeem_setup(
+      usduAmount,
+      collateralAmount,
+      nonce
+    );
+
+    uint256 contractBalance = IERC20(collateral_asset).balanceOf(address(UnitasMintingContract));
+    console.log("Contract collateral balance before redeem:", contractBalance);
+    vm.startPrank(redeemer);
+    UnitasMintingContract.redeem(redeemOrder, takerSignature2);
+    vm.stopPrank();
+  }
+
+  function run() public {
+    execute_redeem();
   }
 }
