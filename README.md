@@ -26,6 +26,30 @@
 | 铸造 | 10,200,000 USDu |
 | 赎回 | 2,000,000 USDu |
 
+### 权限地址
+
+#### UnitasMintingV2
+
+| 角色 / 标的 | 说明 | 地址 |
+|-------------|------|------|
+| `DEFAULT_ADMIN_ROLE` | 管理全部角色、全局限额与资产配置的超级管理员 | _待补充_ |
+| `GATEKEEPER_ROLE` | 可在紧急情况下禁用铸造/赎回并移除操作角色 | _待补充_ |
+| `MINTER_ROLE` | 允许执行 `mint` / `mintWETH` 的操作账号 | _待补充_ |
+| `REDEEMER_ROLE` | 允许执行 `redeem` 的操作账号 | _待补充_ |
+| `COLLATERAL_MANAGER_ROLE` | 负责调用 `transferToCustody` 的资产托管账号 | _待补充_ |
+| Custodians | 已添加的托管钱包（`addCustodianAddress`） | _待补充_ |
+| Whitelisted Benefactors | `_whitelistedBenefactors` 白名单地址 | _待补充_ |
+| Approved Beneficiaries | 各 Benefactor 设置的受益人列表 | _待补充_ |
+| Delegated Signers | 经 `delegatedSigner` 授权的签名账号 | _待补充_ |
+
+#### StakedUSDu / StakedUSDuV2
+
+| 角色 / 标的 | 说明 | 地址 |
+|-------------|------|------|
+| `DEFAULT_ADMIN_ROLE` | 合约所有者，管理其他角色与关键参数 | _待补充_ |
+| `REWARDER_ROLE` | 负责调用 `transferInRewards` 分发奖励的账号 | _待补充_ |
+| `BLACKLIST_MANAGER_ROLE` | 可执行 `addToBlacklist` / `removeFromBlacklist` 的管控账号 | _待补充_ |
+
 ## 主要合约
 
 ### UnitasMinting
