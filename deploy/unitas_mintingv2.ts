@@ -51,5 +51,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 func.id = "unitas_mintingv2";
 func.tags = ["UnitasMintingV2"];
-func.dependencies = ["USDu"];
+func.dependencies = ["USDu", "StakedUSDuV2"];
 export default func;
