@@ -15,7 +15,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const DEFAULT_COMPILER_SETTINGS = {
-    version: "0.8.19",
+    version: "0.8.27",
     settings: {
         viaIR: true,
         optimizer: {

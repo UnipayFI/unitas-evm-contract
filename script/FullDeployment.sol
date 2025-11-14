@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./DeploymentUtils.sol";
 import "forge-std/Script.sol";
-import {StdUtils} from "forge-std/StdUtils.sol";
+import { StdUtils } from "forge-std/StdUtils.sol";
 import "../contracts/StakedUSDu.sol";
 import "../contracts/interfaces/IUSDu.sol";
 import "../contracts/mock/MockToken.sol";
@@ -64,7 +64,9 @@ contract FullDeployment is Script, DeploymentUtils {
 
     contracts.stakedUSDu = StakedUSDu(
       _create2Deploy(
-        SALT, type(StakedUSDu).creationCode, abi.encode(address(contracts.USDuToken), deployerAddress, deployerAddress)
+        SALT,
+        type(StakedUSDu).creationCode,
+        abi.encode(address(contracts.USDuToken), deployerAddress, deployerAddress)
       )
     );
 
@@ -77,7 +79,9 @@ contract FullDeployment is Script, DeploymentUtils {
     // stEth //
     contracts.stEth = MockToken(
       _create2Deploy(
-        SALT, type(MockToken).creationCode, abi.encode("Mocked stETH", "stETH", uint256(18), deployerAddress)
+        SALT,
+        type(MockToken).creationCode,
+        abi.encode("Mocked stETH", "stETH", uint256(18), deployerAddress)
       )
     );
     // rETH //
@@ -146,7 +150,9 @@ contract FullDeployment is Script, DeploymentUtils {
     _utilsIsOwner(deployerAddress, address(contracts.unitasMintingContract));
 
     _utilsHasRole(
-      contracts.unitasMintingContract.DEFAULT_ADMIN_ROLE(), deployerAddress, address(contracts.unitasMintingContract)
+      contracts.unitasMintingContract.DEFAULT_ADMIN_ROLE(),
+      deployerAddress,
+      address(contracts.unitasMintingContract)
     );
 
     vm.stopBroadcast();
@@ -178,7 +184,9 @@ contract FullDeployment is Script, DeploymentUtils {
     // console.log('USDT                          : %s/address/%s', blockExplorerUrl, address(contracts.usdt));
     // console.log('WBETH                         : %s/address/%s', blockExplorerUrl, address(contracts.wbETH));
     console.log(
-      "Unitas Minting                  : %s/address/%s", blockExplorerUrl, address(contracts.unitasMintingContract)
+      "Unitas Minting                  : %s/address/%s",
+      blockExplorerUrl,
+      address(contracts.unitasMintingContract)
     );
     return contracts;
   }

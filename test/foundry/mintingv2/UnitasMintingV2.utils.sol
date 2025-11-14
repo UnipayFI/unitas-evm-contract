@@ -1,39 +1,42 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 /* solhint-disable func-name-mixedcase  */
 
-import "./MintingBaseSetup.sol";
 import "forge-std/console.sol";
+import "./UnitasMintingV2BaseSetup.sol";
 
 // These functions are reused across multiple files
-contract UnitasMintingUtils is MintingBaseSetup {
-  function maxMint_perBlock_exceeded_revert(uint256 excessiveMintAmount) public {
+contract UnitasMintingV2Utils is UnitasMintingV2BaseSetup {
+  function maxMint_perBlock_exceeded_revert(uint128 excessiveMintAmount) public {
     // This amount is always greater than the allowed max mint per block
-    vm.assume(excessiveMintAmount > UnitasMintingContract.maxMintPerBlock());
+    (, , uint128 maxMintPerBlock, ) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    vm.assume(excessiveMintAmount > (maxMintPerBlock));
     (
-      IUnitasMinting.Order memory order,
-      IUnitasMinting.Signature memory takerSignature,
-      IUnitasMinting.Route memory route
-    ) = mint_setup(excessiveMintAmount, _stETHToDeposit, 1, false);
+      IUnitasMintingV2.Order memory order,
+      IUnitasMintingV2.Signature memory takerSignature,
+      IUnitasMintingV2.Route memory route
+    ) = mint_setup(excessiveMintAmount, _stETHToDeposit, stETHToken, 1, false);
 
     vm.prank(minter);
     vm.expectRevert(MaxMintPerBlockExceeded);
     UnitasMintingContract.mint(order, route, takerSignature);
 
     assertEq(usduToken.balanceOf(beneficiary), 0, "The beneficiary balance should be 0");
-    assertEq(stETHToken.balanceOf(address(UnitasMintingContract)), 0, "The unitas minting stETH balance should be 0");
+    assertEq(stETHToken.balanceOf(address(UnitasMintingContract)), 0, "The usdu minting stETH balance should be 0");
     assertEq(stETHToken.balanceOf(benefactor), _stETHToDeposit, "Mismatch in stETH balance");
   }
 
-  function maxRedeem_perBlock_exceeded_revert(uint256 excessiveRedeemAmount) public {
+  function maxRedeem_perBlock_exceeded_revert(uint128 excessiveRedeemAmount) public {
     // Set the max mint per block to the same value as the max redeem in order to get to the redeem
     vm.prank(owner);
-    UnitasMintingContract.setMaxMintPerBlock(excessiveRedeemAmount);
+    UnitasMintingContract.setMaxMintPerBlock(excessiveRedeemAmount, address(stETHToken));
 
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+    (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) = redeem_setup(
       excessiveRedeemAmount,
       _stETHToDeposit,
+      stETHToken,
       1,
       false
     );
@@ -49,21 +52,22 @@ contract UnitasMintingUtils is MintingBaseSetup {
     vm.stopPrank();
   }
 
-  function executeMint() public {
+  function executeMint(IERC20 collateralAsset) public {
     (
-      IUnitasMinting.Order memory order,
-      IUnitasMinting.Signature memory takerSignature,
-      IUnitasMinting.Route memory route
-    ) = mint_setup(_usduToMint, _stETHToDeposit, 1, false);
+      IUnitasMintingV2.Order memory order,
+      IUnitasMintingV2.Signature memory takerSignature,
+      IUnitasMintingV2.Route memory route
+    ) = mint_setup(_usduToMint, _stETHToDeposit, collateralAsset, 1, false);
 
     vm.prank(minter);
     UnitasMintingContract.mint(order, route, takerSignature);
   }
 
-  function executeRedeem() public {
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+  function executeRedeem(IERC20 collateralAsset) public {
+    (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) = redeem_setup(
       _usduToMint,
       _stETHToDeposit,
+      collateralAsset,
       1,
       false
     );

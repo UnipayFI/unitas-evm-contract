@@ -52,8 +52,14 @@ contract MainnetMintDeployment is Script, DeploymentUtils {
     // copper address
     custodians[0] = address(0x6b95F243959329bb88F5D3Df9A7127Efba703fDA);
 
-    contracts.unitasMintingContract =
-      new UnitasMinting(iUSDu, assets, custodians, deployerAddress, MAX_USDU_MINT_PER_BLOCK, MAX_USDU_REDEEM_PER_BLOCK);
+    contracts.unitasMintingContract = new UnitasMinting(
+      iUSDu,
+      assets,
+      custodians,
+      deployerAddress,
+      MAX_USDU_MINT_PER_BLOCK,
+      MAX_USDU_REDEEM_PER_BLOCK
+    );
 
     // Set minter role
     contracts.USDuToken.setMinter(address(contracts.unitasMintingContract));
@@ -65,7 +71,8 @@ contract MainnetMintDeployment is Script, DeploymentUtils {
     console.log("=====> Minting Unitas contracts deployed ....");
     console.log("USDu                          : https://etherscan.io/address/%s", address(contracts.USDuToken));
     console.log(
-      "Unitas Minting                  : https://etherscan.io/address/%s", address(contracts.unitasMintingContract)
+      "Unitas Minting                  : https://etherscan.io/address/%s",
+      address(contracts.unitasMintingContract)
     );
     return contracts;
   }

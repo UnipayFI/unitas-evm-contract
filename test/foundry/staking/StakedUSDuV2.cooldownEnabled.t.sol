@@ -3,9 +3,9 @@ pragma solidity >=0.8;
 
 /* solhint-disable func-name-mixedcase  */
 
-import {console} from "forge-std/console.sol";
+import { console } from "forge-std/console.sol";
 import "forge-std/Test.sol";
-import {SigUtils} from "forge-std/SigUtils.sol";
+import { SigUtils } from "forge-std/SigUtils.sol";
 
 import "../../../contracts/USDu.sol";
 import "../../../contracts/StakedUSDuV2.sol";
@@ -29,7 +29,11 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
 
   event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
   event Withdraw(
-    address indexed caller, address indexed receiver, address indexed owner, uint256 assets, uint256 shares
+    address indexed caller,
+    address indexed receiver,
+    address indexed owner,
+    uint256 assets,
+    uint256 shares
   );
   event RewardsReceived(uint256 indexed amount, uint256 newVestingUSDuAmount);
 
@@ -350,11 +354,11 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     uint256 rewardAmount,
     uint256 waitSeconds
   ) public {
-    vm.assume(
-      amount1 >= 100 ether && amount2 > 0 && amount3 > 0 && rewardAmount > 0 && waitSeconds <= 9 hours
-      // 100 trillion USD with 18 decimals
-      && amount1 < 1e32 && amount2 < 1e32 && amount3 < 1e32 && rewardAmount < 1e32
-    );
+    amount1 = bound(amount1, 100 ether, 1e32 - 1);
+    amount2 = bound(amount2, 1 ether, 1e32 - 1);
+    amount3 = bound(amount3, 1 ether, 1e32 - 1);
+    rewardAmount = bound(rewardAmount, 1, 1e32 - 1);
+    waitSeconds = bound(waitSeconds, 0, 9 hours);
 
     uint256 totalContributions = amount1;
 

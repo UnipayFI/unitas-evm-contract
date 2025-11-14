@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 /* solhint-disable func-name-mixedcase  */
 
-import "../UnitasMinting.utils.sol";
+import "../UnitasMintingV2.utils.sol";
 
-contract UnitasMintingCoreTest is UnitasMintingUtils {
+contract UnitasMintingV2CoreTest is UnitasMintingV2Utils {
   function setUp() public override {
     super.setUp();
   }
 
   function test_mint() public {
-    executeMint();
+    executeMint(stETHToken);
   }
 
   function test_redeem() public {
-    executeRedeem();
+    executeRedeem(stETHToken);
     assertEq(stETHToken.balanceOf(address(UnitasMintingContract)), 0, "Mismatch in stETH balance");
     assertEq(stETHToken.balanceOf(beneficiary), _stETHToDeposit, "Mismatch in stETH balance");
     assertEq(usduToken.balanceOf(beneficiary), 0, "Mismatch in USDu balance");
@@ -23,12 +23,15 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
 
   function test_redeem_invalidNonce_revert() public {
     // Unset the max redeem per block limit
-    vm.prank(owner);
-    UnitasMintingContract.setMaxRedeemPerBlock(type(uint256).max);
+    vm.startPrank(owner);
+    UnitasMintingContract.setMaxRedeemPerBlock(MAX_USDE_MINT_AND_REDEEM_PER_BLOCK * 10, address(stETHToken));
+    UnitasMintingContract.setGlobalMaxRedeemPerBlock(type(uint128).max);
+    vm.stopPrank();
 
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+    (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) = redeem_setup(
       _usduToMint,
       _stETHToDeposit,
+      stETHToken,
       1,
       false
     );
@@ -43,9 +46,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
   function test_nativeEth_withdraw() public {
     vm.deal(address(UnitasMintingContract), _stETHToDeposit);
 
-    IUnitasMinting.Order memory order = IUnitasMinting.Order({
-      order_type: IUnitasMinting.OrderType.MINT,
-      expiry: block.timestamp + 10 minutes,
+    IUnitasMintingV2.Order memory order = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.MINT,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(block.timestamp + 10 minutes),
       nonce: 8,
       benefactor: benefactor,
       beneficiary: benefactor,
@@ -57,20 +61,20 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     address[] memory targets = new address[](1);
     targets[0] = address(UnitasMintingContract);
 
-    uint256[] memory ratios = new uint256[](1);
+    uint128[] memory ratios = new uint128[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
+    IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature = signOrder(
+    IUnitasMintingV2.Signature memory takerSignature = signOrder(
       benefactorPrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
     vm.stopPrank();
 
@@ -84,9 +88,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     assertEq(usduToken.balanceOf(benefactor), _usduToMint);
 
     //redeem
-    IUnitasMinting.Order memory redeemOrder = IUnitasMinting.Order({
-      order_type: IUnitasMinting.OrderType.REDEEM,
-      expiry: block.timestamp + 10 minutes,
+    IUnitasMintingV2.Order memory redeemOrder = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.REDEEM,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(block.timestamp + 10 minutes),
       nonce: 800,
       benefactor: benefactor,
       beneficiary: benefactor,
@@ -100,10 +105,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     usduToken.approve(address(UnitasMintingContract), _usduToMint);
 
     bytes32 digest3 = UnitasMintingContract.hashOrder(redeemOrder);
-    IUnitasMinting.Signature memory takerSignature2 = signOrder(
+    IUnitasMintingV2.Signature memory takerSignature2 = signOrder(
       benefactorPrivateKey,
       digest3,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
     vm.stopPrank();
 
@@ -117,14 +122,14 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     vm.stopPrank();
   }
 
-  function test_fuzz_mint_noSlippage(uint256 expectedAmount) public {
+  function test_fuzz_mint_noSlippage(uint128 expectedAmount) public {
     vm.assume(expectedAmount > 0 && expectedAmount < _maxMintPerBlock);
 
     (
-      IUnitasMinting.Order memory order,
-      IUnitasMinting.Signature memory takerSignature,
-      IUnitasMinting.Route memory route
-    ) = mint_setup(expectedAmount, _stETHToDeposit, 1, false);
+      IUnitasMintingV2.Order memory order,
+      IUnitasMintingV2.Signature memory takerSignature,
+      IUnitasMintingV2.Route memory route
+    ) = mint_setup(expectedAmount, _stETHToDeposit, stETHToken, 1, false);
 
     vm.recordLogs();
     vm.prank(minter);
@@ -136,16 +141,17 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
   }
 
   function test_multipleValid_custodyRatios_addresses() public {
-    uint256 _smallUsduToMint = 1.75 * 10 ** 23;
-    IUnitasMinting.Order memory order = IUnitasMinting.Order({
-      order_type: IUnitasMinting.OrderType.MINT,
-      expiry: block.timestamp + 10 minutes,
+    uint128 _smallUsdeToMint = 1.75 * 10 ** 23;
+    IUnitasMintingV2.Order memory order = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.MINT,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(block.timestamp + 10 minutes),
       nonce: 14,
       benefactor: benefactor,
       beneficiary: beneficiary,
       collateral_asset: address(stETHToken),
       collateral_amount: _stETHToDeposit,
-      usdu_amount: _smallUsduToMint
+      usdu_amount: _smallUsdeToMint
     });
 
     address[] memory targets = new address[](3);
@@ -153,22 +159,22 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     targets[1] = custodian1;
     targets[2] = custodian2;
 
-    uint256[] memory ratios = new uint256[](3);
+    uint128[] memory ratios = new uint128[](3);
     ratios[0] = 3_000;
     ratios[1] = 4_000;
     ratios[2] = 3_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
+    IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature = signOrder(
+    IUnitasMintingV2.Signature memory takerSignature = signOrder(
       benefactorPrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
     vm.stopPrank();
 
@@ -185,7 +191,7 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     UnitasMintingContract.mint(order, route, takerSignature);
 
     assertEq(stETHToken.balanceOf(benefactor), 0);
-    assertEq(usduToken.balanceOf(beneficiary), _smallUsduToMint);
+    assertEq(usduToken.balanceOf(beneficiary), _smallUsdeToMint);
 
     assertEq(stETHToken.balanceOf(address(custodian1)), (_stETHToDeposit * 4) / 10);
     assertEq(stETHToken.balanceOf(address(custodian2)), (_stETHToDeposit * 3) / 10);
@@ -200,13 +206,14 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     UnitasMintingContract.mint(order, route, takerSignature);
   }
 
-  function test_fuzz_multipleInvalid_custodyRatios_revert(uint256 ratio1) public {
-    ratio1 = bound(ratio1, 0, UINT256_MAX - 7_000);
+  function test_fuzz_multipleInvalid_custodyRatios_revert(uint128 ratio1) public {
+    ratio1 = uint128(bound(ratio1, 0, type(uint128).max - 7_000));
     vm.assume(ratio1 != 3_000);
 
-    IUnitasMinting.Order memory mintOrder = IUnitasMinting.Order({
-      order_type: IUnitasMinting.OrderType.MINT,
-      expiry: block.timestamp + 10 minutes,
+    IUnitasMintingV2.Order memory mintOrder = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.MINT,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(block.timestamp + 10 minutes),
       nonce: 15,
       benefactor: benefactor,
       beneficiary: beneficiary,
@@ -219,20 +226,20 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     targets[0] = address(UnitasMintingContract);
     targets[1] = owner;
 
-    uint256[] memory ratios = new uint256[](2);
+    uint128[] memory ratios = new uint128[](2);
     ratios[0] = ratio1;
     ratios[1] = 7_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
+    IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(mintOrder);
-    IUnitasMinting.Signature memory takerSignature = signOrder(
+    IUnitasMintingV2.Signature memory takerSignature = signOrder(
       benefactorPrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
     vm.stopPrank();
 
@@ -249,12 +256,13 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     assertEq(stETHToken.balanceOf(owner), 0);
   }
 
-  function test_fuzz_singleInvalid_custodyRatio_revert(uint256 ratio1) public {
+  function test_fuzz_singleInvalid_custodyRatio_revert(uint128 ratio1) public {
     vm.assume(ratio1 != 10_000);
 
-    IUnitasMinting.Order memory order = IUnitasMinting.Order({
-      order_type: IUnitasMinting.OrderType.MINT,
-      expiry: block.timestamp + 10 minutes,
+    IUnitasMintingV2.Order memory order = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.MINT,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(block.timestamp + 10 minutes),
       nonce: 16,
       benefactor: benefactor,
       beneficiary: beneficiary,
@@ -266,20 +274,20 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     address[] memory targets = new address[](1);
     targets[0] = address(UnitasMintingContract);
 
-    uint256[] memory ratios = new uint256[](1);
+    uint128[] memory ratios = new uint128[](1);
     ratios[0] = ratio1;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
+    IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature = signOrder(
+    IUnitasMintingV2.Signature memory takerSignature = signOrder(
       benefactorPrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
     vm.stopPrank();
 
@@ -301,9 +309,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     stETHToken.mint(_stETHToDeposit, benefactor);
     vm.stopPrank();
 
-    IUnitasMinting.Order memory order = IUnitasMinting.Order({
-      order_type: IUnitasMinting.OrderType.MINT,
-      expiry: block.timestamp + 10 minutes,
+    IUnitasMintingV2.Order memory order = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.MINT,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(block.timestamp + 10 minutes),
       nonce: 18,
       benefactor: benefactor,
       beneficiary: beneficiary,
@@ -315,20 +324,20 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     address[] memory targets = new address[](1);
     targets[0] = address(UnitasMintingContract);
 
-    uint256[] memory ratios = new uint256[](1);
+    uint128[] memory ratios = new uint128[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
+    IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature = signOrder(
+    IUnitasMintingV2.Signature memory takerSignature = signOrder(
       benefactorPrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
     vm.stopPrank();
 
@@ -344,9 +353,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     vm.deal(benefactor, _stETHToDeposit);
     vm.stopPrank();
 
-    IUnitasMinting.Order memory order = IUnitasMinting.Order({
-      order_type: IUnitasMinting.OrderType.MINT,
-      expiry: block.timestamp + 10 minutes,
+    IUnitasMintingV2.Order memory order = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.MINT,
+      order_id: generateRandomOrderId(),
+      expiry: uint120(block.timestamp + 10 minutes),
       nonce: 19,
       benefactor: benefactor,
       beneficiary: beneficiary,
@@ -358,20 +368,20 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     address[] memory targets = new address[](1);
     targets[0] = address(UnitasMintingContract);
 
-    uint256[] memory ratios = new uint256[](1);
+    uint128[] memory ratios = new uint128[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
+    IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
     // taker
     vm.startPrank(benefactor);
     stETHToken.approve(address(UnitasMintingContract), _stETHToDeposit);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
-    IUnitasMinting.Signature memory takerSignature = signOrder(
+    IUnitasMintingV2.Signature memory takerSignature = signOrder(
       benefactorPrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
     vm.stopPrank();
 
@@ -384,10 +394,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
 
   function test_expired_orders_revert() public {
     (
-      IUnitasMinting.Order memory order,
-      IUnitasMinting.Signature memory takerSignature,
-      IUnitasMinting.Route memory route
-    ) = mint_setup(_usduToMint, _stETHToDeposit, 1, false);
+      IUnitasMintingV2.Order memory order,
+      IUnitasMintingV2.Signature memory takerSignature,
+      IUnitasMintingV2.Route memory route
+    ) = mint_setup(_usduToMint, _stETHToDeposit, stETHToken, 1, false);
 
     vm.warp(block.timestamp + 11 minutes);
 
@@ -403,7 +413,7 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     vm.expectEmit(true, false, false, false);
     emit AssetAdded(asset);
     vm.startPrank(owner);
-    UnitasMintingContract.addSupportedAsset(asset);
+    UnitasMintingContract.addSupportedAsset(asset, assetConfig);
     assertTrue(UnitasMintingContract.isSupportedAsset(asset));
 
     vm.expectEmit(true, false, false, false);
@@ -417,11 +427,11 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     vm.expectEmit(true, false, false, false);
     emit AssetAdded(asset);
     vm.startPrank(owner);
-    UnitasMintingContract.addSupportedAsset(asset);
+    UnitasMintingContract.addSupportedAsset(asset, assetConfig);
     assertTrue(UnitasMintingContract.isSupportedAsset(asset));
 
     vm.expectRevert(InvalidAssetAddress);
-    UnitasMintingContract.addSupportedAsset(asset);
+    UnitasMintingContract.addSupportedAsset(asset, assetConfig);
   }
 
   function test_cannot_removeAsset_not_supported_revert() public {
@@ -436,19 +446,20 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
   function test_cannotAdd_addressZero_revert() public {
     vm.prank(owner);
     vm.expectRevert(InvalidAssetAddress);
-    UnitasMintingContract.addSupportedAsset(address(0));
+    UnitasMintingContract.addSupportedAsset(address(0), assetConfig);
   }
 
   function test_cannotAdd_USDu_revert() public {
     vm.prank(owner);
     vm.expectRevert(InvalidAssetAddress);
-    UnitasMintingContract.addSupportedAsset(address(usduToken));
+    UnitasMintingContract.addSupportedAsset(address(usduToken), stableConfig);
   }
 
   function test_sending_redeem_order_to_mint_revert() public {
-    (IUnitasMinting.Order memory order, IUnitasMinting.Signature memory takerSignature) = redeem_setup(
+    (IUnitasMintingV2.Order memory order, IUnitasMintingV2.Signature memory takerSignature) = redeem_setup(
       1 ether,
       50 ether,
+      stETHToken,
       20,
       false
     );
@@ -456,10 +467,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
     address[] memory targets = new address[](1);
     targets[0] = address(UnitasMintingContract);
 
-    uint256[] memory ratios = new uint256[](1);
+    uint128[] memory ratios = new uint128[](1);
     ratios[0] = 10_000;
 
-    IUnitasMinting.Route memory route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
+    IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
     vm.expectRevert(InvalidOrder);
     vm.prank(minter);
@@ -467,9 +478,10 @@ contract UnitasMintingCoreTest is UnitasMintingUtils {
   }
 
   function test_sending_mint_order_to_redeem_revert() public {
-    (IUnitasMinting.Order memory order, IUnitasMinting.Signature memory takerSignature, ) = mint_setup(
+    (IUnitasMintingV2.Order memory order, IUnitasMintingV2.Signature memory takerSignature, ) = mint_setup(
       1 ether,
       50 ether,
+      stETHToken,
       20,
       false
     );

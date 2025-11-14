@@ -3,31 +3,20 @@ pragma solidity ^0.8.0;
 
 /* solhint-disable func-name-mixedcase  */
 
-import "../UnitasMinting.utils.sol";
+import "../UnitasMintingV2.utils.sol";
 import "../../../../contracts/interfaces/ISingleAdminAccessControl.sol";
+import "../../../../contracts/interfaces/IUnitasMintingV2.sol";
 
-contract UnitasMintingACLTest is UnitasMintingUtils {
+contract UnitasMintingV2ACLTest is UnitasMintingV2Utils {
   function setUp() public override {
     super.setUp();
   }
 
-  function test_role_authorization() public {
-    vm.deal(trader1, 1 ether);
-    vm.deal(maker1, 1 ether);
-    vm.deal(maker2, 1 ether);
-    vm.startPrank(minter);
-    stETHToken.mint(1 * 1e18, maker1);
-    stETHToken.mint(1 * 1e18, trader1);
-    vm.expectRevert(OnlyMinterErr);
-    usduToken.mint(address(maker2), 2000 * 1e18);
-    vm.expectRevert(OnlyMinterErr);
-    usduToken.mint(address(trader2), 2000 * 1e18);
-  }
-
   function test_redeem_notRedeemer_revert() public {
-    (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) = redeem_setup(
+    (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) = redeem_setup(
       _usduToMint,
       _stETHToDeposit,
+      stETHToken,
       1,
       false
     );
@@ -48,10 +37,10 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
 
   function test_fuzz_notMinter_cannot_mint(address nonMinter) public {
     (
-      IUnitasMinting.Order memory mintOrder,
-      IUnitasMinting.Signature memory takerSignature,
-      IUnitasMinting.Route memory route
-    ) = mint_setup(_usduToMint, _stETHToDeposit, 1, false);
+      IUnitasMintingV2.Order memory mintOrder,
+      IUnitasMintingV2.Signature memory takerSignature,
+      IUnitasMintingV2.Route memory route
+    ) = mint_setup(_usduToMint, _stETHToDeposit, stETHToken, 1, false);
 
     vm.assume(nonMinter != minter);
     vm.startPrank(nonMinter);
@@ -76,7 +65,13 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     address asset = address(20);
     vm.expectRevert();
     vm.prank(nonOwner);
-    UnitasMintingContract.addSupportedAsset(asset);
+    IUnitasMintingV2.TokenConfig memory tokenConfig = IUnitasMintingV2.TokenConfig(
+      IUnitasMintingV2.TokenType.ASSET,
+      true,
+      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK,
+      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK
+    );
+    UnitasMintingContract.addSupportedAsset(asset, tokenConfig);
     assertFalse(UnitasMintingContract.isSupportedAsset(asset));
   }
 
@@ -86,7 +81,13 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     vm.prank(owner);
     vm.expectEmit(true, false, false, false);
     emit AssetAdded(asset);
-    UnitasMintingContract.addSupportedAsset(asset);
+    IUnitasMintingV2.TokenConfig memory tokenConfig = IUnitasMintingV2.TokenConfig(
+      IUnitasMintingV2.TokenType.ASSET,
+      true,
+      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK,
+      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK
+    );
+    UnitasMintingContract.addSupportedAsset(asset, tokenConfig);
     assertTrue(UnitasMintingContract.isSupportedAsset(asset));
 
     vm.expectRevert();
@@ -95,10 +96,11 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     assertTrue(UnitasMintingContract.isSupportedAsset(asset));
   }
 
-  function test_minter_canTransfer_custody() public {
+  function test_collateralManager_canTransfer_custody() public {
     vm.startPrank(owner);
     stETHToken.mint(1000, address(UnitasMintingContract));
     UnitasMintingContract.addCustodianAddress(beneficiary);
+    UnitasMintingContract.grantRole(collateralManagerRole, minter);
     vm.stopPrank();
     vm.prank(minter);
     vm.expectEmit(true, true, true, true);
@@ -108,21 +110,48 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     assertEq(stETHToken.balanceOf(address(UnitasMintingContract)), 0);
   }
 
-  function test_fuzz_nonMinter_cannot_transferCustody_revert(address nonMinter) public {
-    vm.assume(nonMinter != minter);
+  function test_collateralManager_canTransferNative_custody() public {
+    vm.startPrank(owner);
+    vm.deal(address(UnitasMintingContract), 1000);
+    UnitasMintingContract.addCustodianAddress(beneficiary);
+    UnitasMintingContract.grantRole(collateralManagerRole, minter);
+    vm.stopPrank();
+    vm.prank(minter);
+    vm.expectEmit(true, true, true, true);
+    emit CustodyTransfer(beneficiary, address(NATIVE_TOKEN), 1000);
+    UnitasMintingContract.transferToCustody(beneficiary, address(NATIVE_TOKEN), 1000);
+    assertEq(beneficiary.balance, 1000);
+    assertEq(address(UnitasMintingContract).balance, 0);
+  }
+
+  function test_collateralManager_cannotTransfer_zeroAddress() public {
+    vm.startPrank(owner);
+    stETHToken.mint(1000, address(UnitasMintingContract));
+    UnitasMintingContract.addCustodianAddress(beneficiary);
+    UnitasMintingContract.grantRole(collateralManagerRole, minter);
+    vm.stopPrank();
+    vm.prank(minter);
+    vm.expectRevert(IUnitasMintingV2.InvalidAddress.selector);
+    UnitasMintingContract.transferToCustody(address(0), address(stETHToken), 1000);
+  }
+
+  function test_fuzz_nonCollateralManager_cannot_transferCustody_revert(address nonCollateralManager) public {
+    vm.assume(
+      nonCollateralManager != collateralManager && nonCollateralManager != owner && nonCollateralManager != address(0)
+    );
     stETHToken.mint(1000, address(UnitasMintingContract));
 
     vm.expectRevert(
       bytes(
         string.concat(
           "AccessControl: account ",
-          Strings.toHexString(nonMinter),
+          Strings.toHexString(nonCollateralManager),
           " is missing role ",
-          vm.toString(minterRole)
+          vm.toString(collateralManagerRole)
         )
       )
     );
-    vm.prank(nonMinter);
+    vm.prank(nonCollateralManager);
     UnitasMintingContract.transferToCustody(beneficiary, address(stETHToken), 1000);
   }
 
@@ -141,6 +170,13 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
 
     UnitasMintingContract.removeRedeemerRole(redeemer);
     assertFalse(UnitasMintingContract.hasRole(redeemerRole, redeemer));
+  }
+
+  function test_gatekeeper_can_remove_collateral_manager() public {
+    vm.prank(gatekeeper);
+
+    UnitasMintingContract.removeCollateralManagerRole(collateralManager);
+    assertFalse(UnitasMintingContract.hasRole(collateralManagerRole, collateralManager));
   }
 
   function test_fuzz_not_gatekeeper_cannot_remove_minter_revert(address notGatekeeper) public {
@@ -177,6 +213,23 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     assertTrue(UnitasMintingContract.hasRole(redeemerRole, redeemer));
   }
 
+  function test_fuzz_not_gatekeeper_cannot_remove_collateral_manager_revert(address notGatekeeper) public {
+    vm.assume(notGatekeeper != gatekeeper);
+    vm.startPrank(notGatekeeper);
+    vm.expectRevert(
+      bytes(
+        string.concat(
+          "AccessControl: account ",
+          Strings.toHexString(notGatekeeper),
+          " is missing role ",
+          vm.toString(gatekeeperRole)
+        )
+      )
+    );
+    UnitasMintingContract.removeCollateralManagerRole(collateralManager);
+    assertTrue(UnitasMintingContract.hasRole(collateralManagerRole, collateralManager));
+  }
+
   function test_gatekeeper_cannot_add_minters_revert() public {
     vm.startPrank(gatekeeper);
     vm.expectRevert(
@@ -193,26 +246,47 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     assertFalse(UnitasMintingContract.hasRole(minterRole, bob), "Bob should lack the minter role");
   }
 
+  function test_gatekeeper_cannot_add_collateral_managers_revert() public {
+    vm.startPrank(gatekeeper);
+    vm.expectRevert(
+      bytes(
+        string.concat(
+          "AccessControl: account ",
+          Strings.toHexString(gatekeeper),
+          " is missing role ",
+          vm.toString(adminRole)
+        )
+      )
+    );
+    UnitasMintingContract.grantRole(collateralManagerRole, bob);
+    assertFalse(
+      UnitasMintingContract.hasRole(collateralManagerRole, bob),
+      "Bob should lack the collateralManager role"
+    );
+  }
+
   function test_gatekeeper_can_disable_mintRedeem() public {
     vm.startPrank(gatekeeper);
     UnitasMintingContract.disableMintRedeem();
 
     (
-      IUnitasMinting.Order memory order,
-      IUnitasMinting.Signature memory takerSignature,
-      IUnitasMinting.Route memory route
-    ) = mint_setup(_usduToMint, _stETHToDeposit, 1, false);
+      IUnitasMintingV2.Order memory order,
+      IUnitasMintingV2.Signature memory takerSignature,
+      IUnitasMintingV2.Route memory route
+    ) = mint_setup(_usduToMint, _stETHToDeposit, stETHToken, 1, false);
 
     vm.prank(minter);
-    vm.expectRevert(MaxMintPerBlockExceeded);
+    vm.expectRevert(GlobalMaxMintPerBlockExceeded);
     UnitasMintingContract.mint(order, route, takerSignature);
 
     vm.prank(redeemer);
-    vm.expectRevert(MaxRedeemPerBlockExceeded);
+    vm.expectRevert(GlobalMaxRedeemPerBlockExceeded);
     UnitasMintingContract.redeem(order, takerSignature);
 
-    assertEq(UnitasMintingContract.maxMintPerBlock(), 0, "Minting should be disabled");
-    assertEq(UnitasMintingContract.maxRedeemPerBlock(), 0, "Redeeming should be disabled");
+    (uint128 globalMaxMintPerBlock, uint128 globalMaxRedeemPerBlock) = UnitasMintingContract.globalConfig();
+
+    assertEq(globalMaxMintPerBlock, 0, "Minting should be disabled");
+    assertEq(globalMaxRedeemPerBlock, 0, "Redeeming should be disabled");
   }
 
   // Ensure that the gatekeeper is not allowed to enable/modify the minting
@@ -240,8 +314,8 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
     );
     UnitasMintingContract.disableMintRedeem();
 
-    assertTrue(UnitasMintingContract.maxMintPerBlock() > 0);
-    assertTrue(UnitasMintingContract.maxRedeemPerBlock() > 0);
+    assertTrue(tokenConfig[0].maxMintPerBlock > 0);
+    assertTrue(tokenConfig[0].maxRedeemPerBlock > 0);
   }
 
   /**
@@ -249,36 +323,44 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
    */
   function test_admin_can_disable_mint(bool performCheckMint) public {
     vm.prank(owner);
-    UnitasMintingContract.setMaxMintPerBlock(0);
+    UnitasMintingContract.setMaxMintPerBlock(0, address(stETHToken));
 
     if (performCheckMint) maxMint_perBlock_exceeded_revert(1e18);
 
-    assertEq(UnitasMintingContract.maxMintPerBlock(), 0, "The minting should be disabled");
+    (, , uint128 maxMintPerBlock, ) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertEq(maxMintPerBlock, 0, "The minting should be disabled");
   }
 
   function test_admin_can_disable_redeem(bool performCheckRedeem) public {
     vm.prank(owner);
-    UnitasMintingContract.setMaxRedeemPerBlock(0);
+    UnitasMintingContract.setMaxRedeemPerBlock(0, address(stETHToken));
 
     if (performCheckRedeem) maxRedeem_perBlock_exceeded_revert(1e18);
 
-    assertEq(UnitasMintingContract.maxRedeemPerBlock(), 0, "The redeem should be disabled");
+    (, , , uint128 maxRedeemPerBlock) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertEq(maxRedeemPerBlock, 0, "The redeem should be disabled");
   }
 
   function test_admin_can_enable_mint() public {
     vm.startPrank(owner);
-    UnitasMintingContract.setMaxMintPerBlock(0);
+    UnitasMintingContract.setMaxMintPerBlock(0, address(stETHToken));
 
-    assertEq(UnitasMintingContract.maxMintPerBlock(), 0, "The minting should be disabled");
+    (, , uint128 maxMintPerBlock1, ) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertEq(maxMintPerBlock1, 0, "The minting should be disabled");
 
     // Re-enable the minting
-    UnitasMintingContract.setMaxMintPerBlock(_maxMintPerBlock);
+    UnitasMintingContract.setMaxMintPerBlock(_maxMintPerBlock, address(stETHToken));
 
     vm.stopPrank();
 
-    executeMint();
+    executeMint(stETHToken);
 
-    assertTrue(UnitasMintingContract.maxMintPerBlock() > 0, "The minting should be enabled");
+    (, , uint128 maxMintPerBlock2, ) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertTrue(maxMintPerBlock2 > 0, "The minting should be enabled");
   }
 
   function test_fuzz_nonAdmin_cannot_enable_mint_revert(address notAdmin) public {
@@ -297,11 +379,13 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
         )
       )
     );
-    UnitasMintingContract.setMaxMintPerBlock(_maxMintPerBlock);
+    UnitasMintingContract.setMaxMintPerBlock(_maxMintPerBlock, address(stETHToken));
 
     maxMint_perBlock_exceeded_revert(1e18);
 
-    assertEq(UnitasMintingContract.maxMintPerBlock(), 0, "The minting should remain disabled");
+    (, , uint128 maxMintPerBlock, ) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertEq(maxMintPerBlock, 0, "The minting should remain disabled");
   }
 
   function test_fuzz_nonAdmin_cannot_enable_redeem_revert(address notAdmin) public {
@@ -320,27 +404,33 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
         )
       )
     );
-    UnitasMintingContract.setMaxRedeemPerBlock(_maxRedeemPerBlock);
+    UnitasMintingContract.setMaxRedeemPerBlock(_maxRedeemPerBlock, address(stETHToken));
 
     maxRedeem_perBlock_exceeded_revert(1e18);
 
-    assertEq(UnitasMintingContract.maxRedeemPerBlock(), 0, "The redeeming should remain disabled");
+    (, , , uint128 maxRedeemPerBlock) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertEq(maxRedeemPerBlock, 0, "The redeeming should remain disabled");
   }
 
   function test_admin_can_enable_redeem() public {
     vm.startPrank(owner);
-    UnitasMintingContract.setMaxRedeemPerBlock(0);
+    UnitasMintingContract.setMaxRedeemPerBlock(0, address(stETHToken));
 
-    assertEq(UnitasMintingContract.maxRedeemPerBlock(), 0, "The redeem should be disabled");
+    (, , , uint128 maxRedeemPerBlock1) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertEq(maxRedeemPerBlock1, 0, "The redeem should be disabled");
 
     // Re-enable the redeeming
-    UnitasMintingContract.setMaxRedeemPerBlock(_maxRedeemPerBlock);
+    UnitasMintingContract.setMaxRedeemPerBlock(_maxRedeemPerBlock, address(stETHToken));
 
     vm.stopPrank();
 
-    executeRedeem();
+    executeRedeem(stETHToken);
 
-    assertTrue(UnitasMintingContract.maxRedeemPerBlock() > 0, "The redeeming should be enabled");
+    (, , , uint128 maxRedeemPerBlock2) = UnitasMintingContract.tokenConfig(address(stETHToken));
+
+    assertTrue(maxRedeemPerBlock2 > 0, "The redeeming should be enabled");
   }
 
   function test_admin_can_add_minter() public {
@@ -672,17 +762,64 @@ contract UnitasMintingACLTest is UnitasMintingUtils {
   }
 
   function testCorrectInitConfig() public {
-    UnitasMinting unitasMinting2 = new UnitasMinting(
+    UnitasMintingV2 usduMinting2 = new UnitasMintingV2(
       IUSDu(address(usduToken)),
+      IWETH9(address(NATIVE_TOKEN)),
       assets,
+      tokenConfig,
+      globalConfig,
       custodians,
-      randomer,
-      _maxMintPerBlock,
-      _maxRedeemPerBlock
+      randomer
     );
-    assertFalse(unitasMinting2.hasRole(adminRole, owner));
-    assertNotEq(unitasMinting2.owner(), owner);
-    assertTrue(unitasMinting2.hasRole(adminRole, randomer));
-    assertEq(unitasMinting2.owner(), randomer);
+
+    assertFalse(usduMinting2.hasRole(adminRole, owner));
+    assertNotEq(usduMinting2.owner(), owner);
+    assertTrue(usduMinting2.hasRole(adminRole, randomer));
+    assertEq(usduMinting2.owner(), randomer);
+  }
+
+  function testInitConfigBlockLimitMismatch() public {
+    // define zero token tokenConfig
+    IUnitasMintingV2.TokenConfig[] memory zeroTokenConfig = new IUnitasMintingV2.TokenConfig[](6);
+    // 6 zero configs
+    for (uint256 i = 0; i < 6; i++) {
+      zeroTokenConfig[i] = IUnitasMintingV2.TokenConfig(IUnitasMintingV2.TokenType.ASSET, true, 0, 0);
+    }
+    vm.expectRevert(InvalidAmount);
+    new UnitasMintingV2(
+      IUSDu(address(usduToken)),
+      IWETH9(address(NATIVE_TOKEN)),
+      assets,
+      zeroTokenConfig,
+      globalConfig,
+      custodians,
+      randomer
+    );
+
+    // mismatched redeem configuration versus assets
+    IUnitasMintingV2.TokenConfig[] memory invalidRedeemTokenConfig = new IUnitasMintingV2.TokenConfig[](1);
+    invalidRedeemTokenConfig[0] = IUnitasMintingV2.TokenConfig(IUnitasMintingV2.TokenType.ASSET, true, 1, 1);
+
+    vm.expectRevert(InvalidAssetAddress);
+    new UnitasMintingV2(
+      IUSDu(address(usduToken)),
+      IWETH9(address(NATIVE_TOKEN)),
+      assets,
+      invalidRedeemTokenConfig,
+      globalConfig,
+      custodians,
+      randomer
+    );
+
+    // correct config
+    new UnitasMintingV2(
+      IUSDu(address(usduToken)),
+      IWETH9(address(NATIVE_TOKEN)),
+      assets,
+      tokenConfig,
+      globalConfig,
+      custodians,
+      randomer
+    );
   }
 }

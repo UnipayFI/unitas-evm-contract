@@ -5,10 +5,10 @@ pragma solidity ^0.8.0;
 /* solhint-disable func-name-mixedcase  */
 /* solhint-disable var-name-mixedcase  */
 
-import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
-import {SigUtils} from "forge-std/SigUtils.sol";
-import {Vm} from "forge-std/Vm.sol";
-import {Utils} from "../../utils/Utils.sol";
+import { stdStorage, StdStorage, Test } from "forge-std/Test.sol";
+import { SigUtils } from "forge-std/SigUtils.sol";
+import { Vm } from "forge-std/Vm.sol";
+import { Utils } from "../../utils/Utils.sol";
 
 import "../../../contracts/mock/MockToken.sol";
 import "../../../contracts/USDu.sol";
@@ -97,9 +97,10 @@ contract MintingBaseSetup is Test, IUnitasMintingEvents, IUSDuDefinitions {
   bytes internal CantRenounceOwnershipErr = abi.encodeWithSelector(IUSDuDefinitions.CantRenounceOwnership.selector);
 
   bytes32 internal constant ROUTE_TYPE = keccak256("Route(address[] addresses,uint256[] ratios)");
-  bytes32 internal constant ORDER_TYPE = keccak256(
-    "Order(uint256 expiry,uint256 nonce,address benefactor,address beneficiary,address asset,uint256 base_amount,uint256 quote_amount)"
-  );
+  bytes32 internal constant ORDER_TYPE =
+    keccak256(
+      "Order(uint256 expiry,uint256 nonce,address benefactor,address beneficiary,address asset,uint256 base_amount,uint256 quote_amount)"
+    );
 
   uint256 internal _slippageRange = 50000000000000000;
   uint256 internal _stETHToDeposit = 50 * 10 ** 18;
@@ -196,8 +197,14 @@ contract MintingBaseSetup is Test, IUnitasMintingEvents, IUSDuDefinitions {
 
     // Set the roles
     vm.startPrank(owner);
-    UnitasMintingContract =
-      new UnitasMinting(IUSDu(address(usduToken)), assets, custodians, owner, _maxMintPerBlock, _maxRedeemPerBlock);
+    UnitasMintingContract = new UnitasMinting(
+      IUSDu(address(usduToken)),
+      assets,
+      custodians,
+      owner,
+      _maxMintPerBlock,
+      _maxRedeemPerBlock
+    );
 
     UnitasMintingContract.grantRole(gatekeeperRole, gatekeeper);
     UnitasMintingContract.grantRole(minterRole, minter);
@@ -219,27 +226,35 @@ contract MintingBaseSetup is Test, IUnitasMintingEvents, IUSDuDefinitions {
   }
 
   function _generateRouteTypeHash(IUnitasMinting.Route memory route) internal pure returns (bytes32) {
-    return keccak256(
-      abi.encode(ROUTE_TYPE, keccak256(abi.encodePacked(route.addresses)), keccak256(abi.encodePacked(route.ratios)))
-    );
+    return
+      keccak256(
+        abi.encode(ROUTE_TYPE, keccak256(abi.encodePacked(route.addresses)), keccak256(abi.encodePacked(route.ratios)))
+      );
   }
 
-  function signOrder(uint256 key, bytes32 digest, IUnitasMinting.SignatureType sigType)
-    public
-    pure
-    returns (IUnitasMinting.Signature memory)
-  {
+  function signOrder(
+    uint256 key,
+    bytes32 digest,
+    IUnitasMinting.SignatureType sigType
+  ) public pure returns (IUnitasMinting.Signature memory) {
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, digest);
     bytes memory sigBytes = _packRsv(r, s, v);
 
-    IUnitasMinting.Signature memory signature =
-      IUnitasMinting.Signature({signature_type: sigType, signature_bytes: sigBytes});
+    IUnitasMinting.Signature memory signature = IUnitasMinting.Signature({
+      signature_type: sigType,
+      signature_bytes: sigBytes
+    });
 
     return signature;
   }
 
   // Generic mint setup reused in the tests to reduce lines of code
-  function mint_setup(uint256 usduAmount, uint256 collateralAmount, uint256 nonce, bool multipleMints)
+  function mint_setup(
+    uint256 usduAmount,
+    uint256 collateralAmount,
+    uint256 nonce,
+    bool multipleMints
+  )
     public
     returns (
       IUnitasMinting.Order memory order,
@@ -264,7 +279,7 @@ contract MintingBaseSetup is Test, IUnitasMintingEvents, IUSDuDefinitions {
     uint256[] memory ratios = new uint256[](1);
     ratios[0] = 10_000;
 
-    route = IUnitasMinting.Route({addresses: targets, ratios: ratios});
+    route = IUnitasMinting.Route({ addresses: targets, ratios: ratios });
 
     vm.startPrank(benefactor);
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
@@ -280,10 +295,12 @@ contract MintingBaseSetup is Test, IUnitasMintingEvents, IUSDuDefinitions {
   }
 
   // Generic redeem setup reused in the tests to reduce lines of code
-  function redeem_setup(uint256 usduAmount, uint256 collateralAmount, uint256 nonce, bool multipleRedeem)
-    public
-    returns (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2)
-  {
+  function redeem_setup(
+    uint256 usduAmount,
+    uint256 collateralAmount,
+    uint256 nonce,
+    bool multipleRedeem
+  ) public returns (IUnitasMinting.Order memory redeemOrder, IUnitasMinting.Signature memory takerSignature2) {
     (
       IUnitasMinting.Order memory mintOrder,
       IUnitasMinting.Signature memory takerSignature,

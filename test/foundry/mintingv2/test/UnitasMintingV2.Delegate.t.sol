@@ -1,30 +1,52 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "../UnitasMinting.utils.sol";
+import "../UnitasMintingV2.utils.sol";
 
-contract UnitasMintingDelegateTest is UnitasMintingUtils {
+contract UnitasMintingV2DelegateTest is UnitasMintingV2Utils {
   function setUp() public override {
     super.setUp();
   }
 
   function testDelegateSuccessfulMint() public {
-    (IUnitasMinting.Order memory order, , IUnitasMinting.Route memory route) = mint_setup(
+    (IUnitasMintingV2.Order memory order, , IUnitasMintingV2.Route memory route) = mint_setup(
       _usduToMint,
       _stETHToDeposit,
+      stETHToken,
       1,
       false
     );
 
+    // request delegation
     vm.prank(benefactor);
+    vm.expectEmit();
+    emit DelegatedSignerInitiated(trader2, benefactor);
     UnitasMintingContract.setDelegatedSigner(trader2);
 
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(trader2, benefactor)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.PENDING),
+      "The delegation status should be pending"
+    );
+
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
+
+    // accept delegation
     vm.prank(trader2);
-    IUnitasMinting.Signature memory trader2Sig = signOrder(
+    vm.expectEmit();
+    emit DelegatedSignerAdded(trader2, benefactor);
+    UnitasMintingContract.confirmDelegatedSigner(benefactor);
+
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(trader2, benefactor)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.ACCEPTED),
+      "The delegation status should be accepted"
+    );
+
+    IUnitasMintingV2.Signature memory trader2Sig = signOrder(
       trader2PrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
 
     assertEq(
@@ -48,21 +70,26 @@ contract UnitasMintingDelegateTest is UnitasMintingUtils {
   }
 
   function testDelegateFailureMint() public {
-    (IUnitasMinting.Order memory order, , IUnitasMinting.Route memory route) = mint_setup(
+    (IUnitasMintingV2.Order memory order, , IUnitasMintingV2.Route memory route) = mint_setup(
       _usduToMint,
       _stETHToDeposit,
+      stETHToken,
       1,
       false
     );
 
-    // omit delegation by benefactor
-
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
+
+    // accept delegation
     vm.prank(trader2);
-    IUnitasMinting.Signature memory trader2Sig = signOrder(
+    vm.expectRevert(IUnitasMintingV2.DelegationNotInitiated.selector);
+    UnitasMintingContract.confirmDelegatedSigner(benefactor);
+
+    vm.prank(trader2);
+    IUnitasMintingV2.Signature memory trader2Sig = signOrder(
       trader2PrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
 
     assertEq(
@@ -73,8 +100,15 @@ contract UnitasMintingDelegateTest is UnitasMintingUtils {
     assertEq(stETHToken.balanceOf(benefactor), _stETHToDeposit, "Mismatch in benefactor stETH balance before mint");
     assertEq(usduToken.balanceOf(beneficiary), 0, "Mismatch in beneficiary USDu balance before mint");
 
+    // assert that the delegation is rejected
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(minter, trader2)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.REJECTED),
+      "The delegation status should be rejected"
+    );
+
     vm.prank(minter);
-    vm.expectRevert(InvalidSignature);
+    vm.expectRevert(InvalidEIP712Signature);
     UnitasMintingContract.mint(order, route, trader2Sig);
 
     assertEq(
@@ -87,17 +121,38 @@ contract UnitasMintingDelegateTest is UnitasMintingUtils {
   }
 
   function testDelegateSuccessfulRedeem() public {
-    (IUnitasMinting.Order memory order, ) = redeem_setup(_usduToMint, _stETHToDeposit, 1, false);
+    (IUnitasMintingV2.Order memory order, ) = redeem_setup(_usduToMint, _stETHToDeposit, stETHToken, 1, false);
 
+    // request delegation
     vm.prank(beneficiary);
+    vm.expectEmit();
+    emit DelegatedSignerInitiated(trader2, beneficiary);
     UnitasMintingContract.setDelegatedSigner(trader2);
 
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(trader2, beneficiary)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.PENDING),
+      "The delegation status should be pending"
+    );
+
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
+
+    // accept delegation
     vm.prank(trader2);
-    IUnitasMinting.Signature memory trader2Sig = signOrder(
+    vm.expectEmit();
+    emit DelegatedSignerAdded(trader2, beneficiary);
+    UnitasMintingContract.confirmDelegatedSigner(beneficiary);
+
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(trader2, beneficiary)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.ACCEPTED),
+      "The delegation status should be accepted"
+    );
+
+    IUnitasMintingV2.Signature memory trader2Sig = signOrder(
       trader2PrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
 
     assertEq(
@@ -121,16 +176,14 @@ contract UnitasMintingDelegateTest is UnitasMintingUtils {
   }
 
   function testDelegateFailureRedeem() public {
-    (IUnitasMinting.Order memory order, ) = redeem_setup(_usduToMint, _stETHToDeposit, 1, false);
-
-    // omit delegation by beneficiary
+    (IUnitasMintingV2.Order memory order, ) = redeem_setup(_usduToMint, _stETHToDeposit, stETHToken, 1, false);
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
     vm.prank(trader2);
-    IUnitasMinting.Signature memory trader2Sig = signOrder(
+    IUnitasMintingV2.Signature memory trader2Sig = signOrder(
       trader2PrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
 
     assertEq(
@@ -141,8 +194,15 @@ contract UnitasMintingDelegateTest is UnitasMintingUtils {
     assertEq(stETHToken.balanceOf(beneficiary), 0, "Mismatch in beneficiary stETH balance before mint");
     assertEq(usduToken.balanceOf(beneficiary), _usduToMint, "Mismatch in beneficiary USDu balance before mint");
 
+    // assert that the delegation is rejected
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(redeemer, trader2)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.REJECTED),
+      "The delegation status should be rejected"
+    );
+
     vm.prank(redeemer);
-    vm.expectRevert(InvalidSignature);
+    vm.expectRevert(InvalidEIP712Signature);
     UnitasMintingContract.redeem(order, trader2Sig);
 
     assertEq(
@@ -155,25 +215,56 @@ contract UnitasMintingDelegateTest is UnitasMintingUtils {
   }
 
   function testCanUndelegate() public {
-    (IUnitasMinting.Order memory order, , IUnitasMinting.Route memory route) = mint_setup(
+    (IUnitasMintingV2.Order memory order, , IUnitasMintingV2.Route memory route) = mint_setup(
       _usduToMint,
       _stETHToDeposit,
+      stETHToken,
       1,
       false
     );
 
-    // delegate and then undelegate
-    vm.startPrank(benefactor);
+    // delegate request
+    vm.prank(benefactor);
+    vm.expectEmit();
+    emit DelegatedSignerInitiated(trader2, benefactor);
     UnitasMintingContract.setDelegatedSigner(trader2);
+
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(trader2, benefactor)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.PENDING),
+      "The delegation status should be pending"
+    );
+
+    // accept the delegation
+    vm.prank(trader2);
+    vm.expectEmit();
+    emit DelegatedSignerAdded(trader2, benefactor);
+    UnitasMintingContract.confirmDelegatedSigner(benefactor);
+
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(trader2, benefactor)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.ACCEPTED),
+      "The delegation status should be accepted"
+    );
+
+    // remove the delegation
+    vm.prank(benefactor);
+    vm.expectEmit();
+    emit DelegatedSignerRemoved(trader2, benefactor);
     UnitasMintingContract.removeDelegatedSigner(trader2);
-    vm.stopPrank();
+
+    assertEq(
+      uint256(UnitasMintingContract.delegatedSigner(trader2, benefactor)),
+      uint256(IUnitasMintingV2.DelegatedSignerStatus.REJECTED),
+      "The delegation status should be accepted"
+    );
 
     bytes32 digest1 = UnitasMintingContract.hashOrder(order);
     vm.prank(trader2);
-    IUnitasMinting.Signature memory trader2Sig = signOrder(
+    IUnitasMintingV2.Signature memory trader2Sig = signOrder(
       trader2PrivateKey,
       digest1,
-      IUnitasMinting.SignatureType.EIP712
+      IUnitasMintingV2.SignatureType.EIP712
     );
 
     assertEq(
@@ -185,7 +276,7 @@ contract UnitasMintingDelegateTest is UnitasMintingUtils {
     assertEq(usduToken.balanceOf(beneficiary), 0, "Mismatch in beneficiary USDu balance before mint");
 
     vm.prank(minter);
-    vm.expectRevert(InvalidSignature);
+    vm.expectRevert(InvalidEIP712Signature);
     UnitasMintingContract.mint(order, route, trader2Sig);
 
     assertEq(

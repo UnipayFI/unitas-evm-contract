@@ -9,17 +9,8 @@ export const config = {
     maxMintPerBlock: parseEther("10200000"),
     maxRedeemPerBlock: parseEther("2000000"),
     weth: getAddress("0xae13d989dac2f0debff460ac112a837c89baa7cd"),
-    assets: [
-      getAddress("0x337610d27c682e347c9cd60bd4b3b107c9d34ddd"),
-      getAddress("0xfe146E53b08E4204A26E3cC5037077bAa52EB174"),
-    ],
+    assets: [getAddress("0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142")],
     tokenConfig: [
-      {
-        tokenType: 0,
-        isActive: true,
-        maxMintPerBlock: parseEther("10200000"),
-        maxRedeemPerBlock: parseEther("2000000"),
-      },
       {
         tokenType: 0,
         isActive: true,
@@ -55,7 +46,9 @@ export const config = {
         maxRedeemPerBlock: parseEther("10000000"),
       },
     ],
-    custodians: [],
+    custodians: [
+
+    ],
   },
   eth_sepolia: {
     usduAdmin: ZeroAddress,
