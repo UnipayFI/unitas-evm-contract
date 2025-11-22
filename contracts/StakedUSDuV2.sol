@@ -79,7 +79,7 @@ contract StakedUSDuV2 is IStakedUSDuCooldown, StakedUSDu {
     UserCooldown storage userCooldown = cooldowns[msg.sender];
     uint256 assets = userCooldown.underlyingAmount;
 
-    if (block.timestamp >= userCooldown.cooldownEnd) {
+    if (block.timestamp >= userCooldown.cooldownEnd || cooldownDuration == 0) {
       userCooldown.cooldownEnd = 0;
       userCooldown.underlyingAmount = 0;
 
