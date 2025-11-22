@@ -137,7 +137,7 @@ contract UnitasMintingV2BaseSetup is Test, IUnitasMintingEventsV2, IUSDuDefiniti
   uint128 internal _maxMintPerBlock = 10e23;
   uint128 internal _maxRedeemPerBlock = _maxMintPerBlock;
 
-  uint128 MAX_USDE_MINT_AND_REDEEM_PER_BLOCK = 2000000 * 10 ** 18; // 1 million USDu
+  uint128 MAX_USDU_MINT_AND_REDEEM_PER_BLOCK = 2000000 * 10 ** 18; // 1 million USDu
   uint128 ASSET_MAX_USTB_MINT_AND_REDEEM_PER_BLOCK = 1000000 * 10 ** 18;
   uint128 STABLE_MAX_USTB_MINT_AND_REDEEM_PER_BLOCK = 1000000 * 10 ** 18;
 
@@ -276,8 +276,8 @@ contract UnitasMintingV2BaseSetup is Test, IUnitasMintingEventsV2, IUSDuDefiniti
     });
 
     globalConfig = IUnitasMintingV2.GlobalConfig(
-      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK,
-      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK
+      MAX_USDU_MINT_AND_REDEEM_PER_BLOCK,
+      MAX_USDU_MINT_AND_REDEEM_PER_BLOCK
     );
 
     usduToken = new USDu(address(this));

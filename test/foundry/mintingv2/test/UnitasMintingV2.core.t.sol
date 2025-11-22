@@ -24,7 +24,7 @@ contract UnitasMintingV2CoreTest is UnitasMintingV2Utils {
   function test_redeem_invalidNonce_revert() public {
     // Unset the max redeem per block limit
     vm.startPrank(owner);
-    UnitasMintingContract.setMaxRedeemPerBlock(MAX_USDE_MINT_AND_REDEEM_PER_BLOCK * 10, address(stETHToken));
+    UnitasMintingContract.setMaxRedeemPerBlock(MAX_USDU_MINT_AND_REDEEM_PER_BLOCK * 10, address(stETHToken));
     UnitasMintingContract.setGlobalMaxRedeemPerBlock(type(uint128).max);
     vm.stopPrank();
 
@@ -141,7 +141,7 @@ contract UnitasMintingV2CoreTest is UnitasMintingV2Utils {
   }
 
   function test_multipleValid_custodyRatios_addresses() public {
-    uint128 _smallUsdeToMint = 1.75 * 10 ** 23;
+    uint128 _smallUsduToMint = 1.75 * 10 ** 23;
     IUnitasMintingV2.Order memory order = IUnitasMintingV2.Order({
       order_type: IUnitasMintingV2.OrderType.MINT,
       order_id: generateRandomOrderId(),
@@ -151,7 +151,7 @@ contract UnitasMintingV2CoreTest is UnitasMintingV2Utils {
       beneficiary: beneficiary,
       collateral_asset: address(stETHToken),
       collateral_amount: _stETHToDeposit,
-      usdu_amount: _smallUsdeToMint
+      usdu_amount: _smallUsduToMint
     });
 
     address[] memory targets = new address[](3);
@@ -191,7 +191,7 @@ contract UnitasMintingV2CoreTest is UnitasMintingV2Utils {
     UnitasMintingContract.mint(order, route, takerSignature);
 
     assertEq(stETHToken.balanceOf(benefactor), 0);
-    assertEq(usduToken.balanceOf(beneficiary), _smallUsdeToMint);
+    assertEq(usduToken.balanceOf(beneficiary), _smallUsduToMint);
 
     assertEq(stETHToken.balanceOf(address(custodian1)), (_stETHToDeposit * 4) / 10);
     assertEq(stETHToken.balanceOf(address(custodian2)), (_stETHToDeposit * 3) / 10);

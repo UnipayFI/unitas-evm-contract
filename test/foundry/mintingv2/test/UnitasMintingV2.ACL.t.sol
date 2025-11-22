@@ -68,8 +68,8 @@ contract UnitasMintingV2ACLTest is UnitasMintingV2Utils {
     IUnitasMintingV2.TokenConfig memory tokenConfig = IUnitasMintingV2.TokenConfig(
       IUnitasMintingV2.TokenType.ASSET,
       true,
-      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK,
-      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK
+      MAX_USDU_MINT_AND_REDEEM_PER_BLOCK,
+      MAX_USDU_MINT_AND_REDEEM_PER_BLOCK
     );
     UnitasMintingContract.addSupportedAsset(asset, tokenConfig);
     assertFalse(UnitasMintingContract.isSupportedAsset(asset));
@@ -84,8 +84,8 @@ contract UnitasMintingV2ACLTest is UnitasMintingV2Utils {
     IUnitasMintingV2.TokenConfig memory tokenConfig = IUnitasMintingV2.TokenConfig(
       IUnitasMintingV2.TokenType.ASSET,
       true,
-      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK,
-      MAX_USDE_MINT_AND_REDEEM_PER_BLOCK
+      MAX_USDU_MINT_AND_REDEEM_PER_BLOCK,
+      MAX_USDU_MINT_AND_REDEEM_PER_BLOCK
     );
     UnitasMintingContract.addSupportedAsset(asset, tokenConfig);
     assertTrue(UnitasMintingContract.isSupportedAsset(asset));
