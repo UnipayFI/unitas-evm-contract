@@ -48,11 +48,11 @@ contract StakedUSDuV2CooldownDisabledTest is StakedUSDuTest {
 
   function test_cooldownShares_fails_cooldownDuration_zero() external {
     vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
-    stakedUSDuV2.cooldownShares(0, address(0));
+    stakedUSDuV2.cooldownShares(0);
   }
 
   function test_cooldownAssets_fails_cooldownDuration_zero() external {
     vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
-    stakedUSDuV2.cooldownAssets(0, address(0));
+    stakedUSDuV2.cooldownAssets(0);
   }
 }

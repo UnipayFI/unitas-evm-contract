@@ -541,14 +541,14 @@
             "type": "uint8"
           },
           {
-            "internalType": "uint120",
+            "internalType": "uint128",
             "name": "expiry",
-            "type": "uint120"
+            "type": "uint128"
           },
           {
-            "internalType": "uint128",
+            "internalType": "uint120",
             "name": "nonce",
-            "type": "uint128"
+            "type": "uint120"
           },
           {
             "internalType": "address",
@@ -607,14 +607,14 @@
             "type": "uint8"
           },
           {
-            "internalType": "uint120",
+            "internalType": "uint128",
             "name": "expiry",
-            "type": "uint120"
+            "type": "uint128"
           },
           {
-            "internalType": "uint128",
+            "internalType": "uint120",
             "name": "nonce",
-            "type": "uint128"
+            "type": "uint120"
           },
           {
             "internalType": "address",
@@ -701,14 +701,14 @@
             "type": "uint8"
           },
           {
-            "internalType": "uint120",
+            "internalType": "uint128",
             "name": "expiry",
-            "type": "uint120"
+            "type": "uint128"
           },
           {
-            "internalType": "uint128",
+            "internalType": "uint120",
             "name": "nonce",
-            "type": "uint128"
+            "type": "uint120"
           },
           {
             "internalType": "address",
@@ -795,14 +795,14 @@
             "type": "uint8"
           },
           {
-            "internalType": "uint120",
+            "internalType": "uint128",
             "name": "expiry",
-            "type": "uint120"
+            "type": "uint128"
           },
           {
-            "internalType": "uint128",
+            "internalType": "uint120",
             "name": "nonce",
-            "type": "uint128"
+            "type": "uint120"
           },
           {
             "internalType": "address",
@@ -906,14 +906,14 @@
             "type": "uint8"
           },
           {
-            "internalType": "uint120",
+            "internalType": "uint128",
             "name": "expiry",
-            "type": "uint120"
+            "type": "uint128"
           },
           {
-            "internalType": "uint128",
+            "internalType": "uint120",
             "name": "nonce",
-            "type": "uint128"
+            "type": "uint120"
           },
           {
             "internalType": "address",

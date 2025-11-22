@@ -93,12 +93,12 @@ contract StakedUSDuV2CooldownBlacklistTest is Test, IERC20Events {
 
     if (expectRevert) {
       vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
-      stakedUSDu.cooldownAssets(amount, staker);
+      stakedUSDu.cooldownAssets(amount);
       vm.stopPrank();
       return;
     }
 
-    stakedUSDu.cooldownAssets(amount, staker);
+    stakedUSDu.cooldownAssets(amount);
     (uint104 cooldownEnd, uint256 assetsOut) = stakedUSDu.cooldowns(staker);
 
     vm.warp(cooldownEnd + 1);
@@ -257,9 +257,9 @@ contract StakedUSDuV2CooldownBlacklistTest is Test, IERC20Events {
 
     // bob (clean caller) attempts to start cooldown for alice (blacklisted owner)
     // This must fail because cooldownAssets calls the patched _withdraw, which checks the status of `owner` (alice).
-    vm.startPrank(bob);
+    vm.startPrank(alice);
     vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
-    stakedUSDu.cooldownAssets(_amount, alice);
+    stakedUSDu.cooldownAssets(_amount);
     vm.stopPrank();
   }
 

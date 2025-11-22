@@ -17,9 +17,9 @@ contract StakedUSDuV2 is IStakedUSDuCooldown, StakedUSDu {
 
   mapping(address => UserCooldown) public cooldowns;
 
-  USDuSilo public silo;
+  USDuSilo public immutable silo;
 
-  uint24 public MAX_COOLDOWN_DURATION = 90 days;
+  uint24 public constant MAX_COOLDOWN_DURATION = 90 days;
 
   uint24 public cooldownDuration;
 
@@ -91,32 +91,30 @@ contract StakedUSDuV2 is IStakedUSDuCooldown, StakedUSDu {
 
   /// @notice redeem assets and starts a cooldown to claim the converted underlying asset
   /// @param assets assets to redeem
-  /// @param owner address to redeem and start cooldown, owner must allowed caller to perform this action
-  function cooldownAssets(uint256 assets, address owner) external ensureCooldownOn returns (uint256) {
-    if (assets > maxWithdraw(owner)) revert ExcessiveWithdrawAmount();
+  function cooldownAssets(uint256 assets) external ensureCooldownOn returns (uint256) {
+    if (assets > maxWithdraw(_msgSender())) revert ExcessiveWithdrawAmount();
 
     uint256 shares = previewWithdraw(assets);
 
-    cooldowns[owner].cooldownEnd = uint104(block.timestamp) + cooldownDuration;
-    cooldowns[owner].underlyingAmount += assets;
+    cooldowns[_msgSender()].cooldownEnd = uint104(block.timestamp) + cooldownDuration;
+    cooldowns[_msgSender()].underlyingAmount += assets;
 
-    _withdraw(_msgSender(), address(silo), owner, assets, shares);
+    _withdraw(_msgSender(), address(silo), _msgSender(), assets, shares);
 
     return shares;
   }
 
   /// @notice redeem shares into assets and starts a cooldown to claim the converted underlying asset
   /// @param shares shares to redeem
-  /// @param owner address to redeem and start cooldown, owner must allowed caller to perform this action
-  function cooldownShares(uint256 shares, address owner) external ensureCooldownOn returns (uint256) {
-    if (shares > maxRedeem(owner)) revert ExcessiveRedeemAmount();
+  function cooldownShares(uint256 shares) external ensureCooldownOn returns (uint256) {
+    if (shares > maxRedeem(_msgSender())) revert ExcessiveRedeemAmount();
 
     uint256 assets = previewRedeem(shares);
 
-    cooldowns[owner].cooldownEnd = uint104(block.timestamp) + cooldownDuration;
-    cooldowns[owner].underlyingAmount += assets;
+    cooldowns[_msgSender()].cooldownEnd = uint104(block.timestamp) + cooldownDuration;
+    cooldowns[_msgSender()].underlyingAmount += assets;
 
-    _withdraw(_msgSender(), address(silo), owner, assets, shares);
+    _withdraw(_msgSender(), address(silo), _msgSender(), assets, shares);
 
     return assets;
   }

@@ -11,15 +11,15 @@ contract UnitasMintingV2WhitelistTest is UnitasMintingV2Utils {
     vm.deal(benefactor, _stETHToDeposit);
   }
 
-  function generate_nonce() public view returns (uint128) {
-    return uint128(uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender))));
+  function generate_nonce() public view returns (uint120) {
+    return uint120(uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender))));
   }
 
   function test_whitelist_mint() public {
     IUnitasMintingV2.Order memory order = IUnitasMintingV2.Order({
       order_type: IUnitasMintingV2.OrderType.MINT,
       order_id: generateRandomOrderId(),
-      expiry: uint120(block.timestamp + 10 minutes),
+      expiry: uint128(block.timestamp + 10 minutes),
       nonce: generate_nonce(),
       benefactor: benefactor,
       beneficiary: beneficiary,

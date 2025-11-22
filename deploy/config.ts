@@ -45,9 +45,7 @@ export const config = {
         maxRedeemPerBlock: parseEther("10000000"),
       },
     ],
-    custodians: [
-        getAddress("0xB464C9890604926bd5Fa7b66Bf15d26BCD0eD3A9")
-    ],
+    custodians: [getAddress("0xB464C9890604926bd5Fa7b66Bf15d26BCD0eD3A9")],
   },
   eth_sepolia: {
     usduAdmin: ZeroAddress,

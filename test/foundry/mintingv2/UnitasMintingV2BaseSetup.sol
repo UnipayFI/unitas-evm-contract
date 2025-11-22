@@ -402,8 +402,8 @@ contract UnitasMintingV2BaseSetup is Test, IUnitasMintingEventsV2, IUSDuDefiniti
     order = IUnitasMintingV2.Order({
       order_type: IUnitasMintingV2.OrderType.MINT,
       order_id: generateRandomOrderId(),
-      expiry: uint120(uint128(block.timestamp + 10 minutes)),
-      nonce: nonce,
+      expiry: uint128(block.timestamp + 10 minutes),
+      nonce: uint120(nonce),
       benefactor: benefactor,
       beneficiary: beneficiary,
       collateral_asset: address(collateralToken),
@@ -453,8 +453,8 @@ contract UnitasMintingV2BaseSetup is Test, IUnitasMintingEventsV2, IUSDuDefiniti
     redeemOrder = IUnitasMintingV2.Order({
       order_type: IUnitasMintingV2.OrderType.REDEEM,
       order_id: generateRandomOrderId(),
-      expiry: uint120(uint128(block.timestamp + 10 minutes)),
-      nonce: nonce + 1,
+      expiry: uint128(block.timestamp + 10 minutes),
+      nonce: uint120(nonce + 1),
       benefactor: beneficiary,
       beneficiary: beneficiary,
       collateral_asset: address(collateralAsset),

@@ -43,8 +43,8 @@ interface IUnitasMintingV2 is IUnitasMintingEventsV2 {
   struct Order {
     string order_id;
     OrderType order_type;
-    uint120 expiry;
-    uint128 nonce;
+    uint128 expiry;
+    uint120 nonce;
     address benefactor;
     address beneficiary;
     address collateral_asset;

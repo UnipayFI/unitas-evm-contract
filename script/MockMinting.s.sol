@@ -88,8 +88,8 @@ contract UnitasMintingV2MockScript is Script {
     order = IUnitasMintingV2.Order({
       order_id: "10",
       order_type: IUnitasMintingV2.OrderType.MINT,
-      nonce: uint128(nonce),
-      expiry: uint120(block.timestamp + 10 minutes),
+      nonce: uint120(nonce),
+      expiry: uint128(block.timestamp + 10 minutes),
       benefactor: benefactor,
       beneficiary: beneficiary,
       collateral_asset: collateral_asset,
@@ -140,8 +140,8 @@ contract UnitasMintingV2MockScript is Script {
     redeemOrder = IUnitasMintingV2.Order({
       order_type: IUnitasMintingV2.OrderType.REDEEM,
       order_id: generateRandomOrderId(),
-      expiry: uint120(uint128(block.timestamp + 10 minutes)),
-      nonce: uint128(nonce + 1),
+      expiry: uint128(block.timestamp + 10 minutes),
+      nonce: uint120(nonce + 1),
       benefactor: beneficiary,
       beneficiary: beneficiary,
       collateral_asset: address(collateral_asset),

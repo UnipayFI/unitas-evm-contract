@@ -88,7 +88,7 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     uint256 balBefore = usduToken.balanceOf(staker);
 
     vm.startPrank(staker);
-    stakedUSDu.cooldownShares(shares, staker);
+    stakedUSDu.cooldownShares(shares);
     (uint104 cooldownEnd, uint256 usduAmount) = stakedUSDu.cooldowns(staker);
 
     vm.warp(cooldownEnd + 1);
@@ -110,7 +110,7 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
 
     vm.startPrank(staker);
 
-    stakedUSDu.cooldownAssets(assets, staker);
+    stakedUSDu.cooldownAssets(assets);
     (uint104 cooldownEnd, uint256 usduAmount) = stakedUSDu.cooldowns(staker);
 
     vm.warp(cooldownEnd + 1);
@@ -176,7 +176,8 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     vm.startPrank(alice);
     usduToken.approve(address(stakedUSDu), 0.01 ether);
     vm.expectRevert(IStakedUSDu.MinSharesViolation.selector);
-    stakedUSDu.cooldownShares(0.5 ether, alice);
+    stakedUSDu.cooldownShares(0.5 ether);
+    vm.stopPrank();
   }
 
   function testCannotStakeWithoutApproval() public {
@@ -518,10 +519,10 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     stakedUSDu.setCooldownDuration(0);
 
     vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
-    stakedUSDu.cooldownAssets(0, address(0));
+    stakedUSDu.cooldownAssets(0);
 
     vm.expectRevert(IStakedUSDu.OperationNotAllowed.selector);
-    stakedUSDu.cooldownShares(0, address(0));
+    stakedUSDu.cooldownShares(0);
   }
 
   function testFuzzCooldownAssets(uint256 amount) public {
@@ -535,7 +536,9 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     vm.expectEmit(true, true, true, true);
     emit Withdraw(alice, address(stakedUSDu.silo()), alice, amount, amount);
 
-    stakedUSDu.cooldownAssets(amount, alice);
+    vm.startPrank(alice);
+    stakedUSDu.cooldownAssets(amount);
+    vm.stopPrank();
 
     assertEq(stakedUSDu.balanceOf(alice), 0);
   }
@@ -551,7 +554,9 @@ contract StakedUSDuV2CooldownTest is Test, IERC20Events {
     vm.expectEmit(true, true, true, true);
     emit Withdraw(alice, address(stakedUSDu.silo()), alice, amount, amount);
 
-    stakedUSDu.cooldownShares(amount, alice);
+    vm.startPrank(alice);
+    stakedUSDu.cooldownShares(amount);
+    vm.stopPrank();
 
     assertEq(stakedUSDu.balanceOf(alice), 0);
   }

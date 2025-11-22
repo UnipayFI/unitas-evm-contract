@@ -86,15 +86,11 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    * @param amount The amount of rewards to transfer.
    */
   function transferInRewards(uint256 amount) external nonReentrant onlyRole(REWARDER_ROLE) notZero(amount) {
-    if (getUnvestedAmount() > 0) revert StillVesting();
-    uint256 newVestingAmount = amount + getUnvestedAmount();
-
-    vestingAmount = newVestingAmount;
-    lastDistributionTimestamp = block.timestamp;
+    _updateVestingAmount(amount);
     // transfer assets from rewarder to this contract
     IERC20(asset()).safeTransferFrom(msg.sender, address(this), amount);
 
-    emit RewardsReceived(amount, newVestingAmount);
+    emit RewardsReceived(amount, vestingAmount);
   }
 
   /**
@@ -142,12 +138,17 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
    * @param from The address to burn the entire balance, with the FULL_RESTRICTED_STAKER_ROLE
    * @param to The address to mint the entire balance of "from" parameter.
    */
-  function redistributeLockedAmount(address from, address to) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function redistributeLockedAmount(address from, address to) external nonReentrant onlyRole(DEFAULT_ADMIN_ROLE) {
     if (hasRole(FULL_RESTRICTED_STAKER_ROLE, from) && !hasRole(FULL_RESTRICTED_STAKER_ROLE, to)) {
       uint256 amountToDistribute = balanceOf(from);
+      uint256 usduToVest = previewRedeem(amountToDistribute);
       _burn(from, amountToDistribute);
       // to address of address(0) enables burning
-      if (to != address(0)) _mint(to, amountToDistribute);
+      if (to == address(0)) {
+        _updateVestingAmount(usduToVest);
+      } else {
+        _mint(to, amountToDistribute);
+      }
 
       emit LockedAmountRedistributed(from, to, amountToDistribute);
     } else {
@@ -239,6 +240,13 @@ contract StakedUSDu is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, E
 
     super._withdraw(caller, receiver, _owner, assets, shares);
     _checkMinShares();
+  }
+
+  function _updateVestingAmount(uint256 newVestingAmount) internal {
+    if (getUnvestedAmount() > 0) revert StillVesting();
+
+    vestingAmount = newVestingAmount;
+    lastDistributionTimestamp = block.timestamp;
   }
 
   /**
