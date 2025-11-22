@@ -9,7 +9,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
 
   let admin;
-  let rewarder;
   const network = hre.network.name as keyof typeof config;
   if (!network) {
     throw new Error("Network not found");
@@ -18,15 +17,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!networkConfig) {
     throw new Error("Network config not found");
   }
-  if (networkConfig.stakedUsduAdmin === ZeroAddress) {
+  if (networkConfig.mintingAdmin === ZeroAddress) {
     admin = deployer;
   } else {
-    admin = networkConfig.stakedUsduAdmin;
-  }
-  if (networkConfig.stakedUsduRewarder === ZeroAddress) {
-    rewarder = deployer;
-  } else {
-    rewarder = networkConfig.stakedUsduRewarder;
+    admin = networkConfig.mintingAdmin;
   }
   const wbnb = networkConfig.weth;
   const usdu = await ethers.getContract("USDu");
@@ -34,14 +28,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     globalMaxMintPerBlock: networkConfig.maxMintPerBlock,
     globalMaxRedeemPerBlock: networkConfig.maxRedeemPerBlock,
   };
-  console.log("globalConfig", globalConfig);
   const tokenConfig = networkConfig.tokenConfig;
   const assets = networkConfig.assets;
   let custodians: string[] = networkConfig.custodians;
   if (custodians.length === 0) {
     custodians = [deployer];
   }
-  console.log("custodians", custodians);
   await deploy("UnitasMintingV2", {
     from: deployer,
     log: true,

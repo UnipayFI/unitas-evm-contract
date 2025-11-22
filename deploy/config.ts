@@ -24,6 +24,7 @@ export const config = {
     usduAdmin: getAddress("0x8E3811B4Dc5022AB9C8Afbb54Be4Aa23780C62b3"),
     stakedUsduAdmin: getAddress("0x179650b38B20773393c3a10B3b55ba57780BDBD9"),
     stakedUsduRewarder: getAddress("0xE59965162286D67308e2ebb6c34E0e18caEAA4F9"),
+    mintingAdmin: getAddress("0x0a6Db8e8f0b79bA5B9f5AC7F5728843b830bB1c8"),
     maxMintPerBlock: parseEther("10200000"),
     maxRedeemPerBlock: parseEther("2000000"),
     weth: getAddress("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"),
