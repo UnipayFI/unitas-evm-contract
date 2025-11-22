@@ -21,10 +21,9 @@ export const config = {
     custodians: [],
   },
   bsc_mainnet: {
-    usduAdmin: ZeroAddress,
-    stakedUsduAdmin: ZeroAddress,
-    stakedUsduRewarder: ZeroAddress,
-    mintingAdmin: ZeroAddress,
+    usduAdmin: getAddress("0x8E3811B4Dc5022AB9C8Afbb54Be4Aa23780C62b3"),
+    stakedUsduAdmin: getAddress("0x179650b38B20773393c3a10B3b55ba57780BDBD9"),
+    stakedUsduRewarder: getAddress("0xE59965162286D67308e2ebb6c34E0e18caEAA4F9"),
     maxMintPerBlock: parseEther("10200000"),
     maxRedeemPerBlock: parseEther("2000000"),
     weth: getAddress("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"),
@@ -47,7 +46,7 @@ export const config = {
       },
     ],
     custodians: [
-
+        getAddress("0xB464C9890604926bd5Fa7b66Bf15d26BCD0eD3A9")
     ],
   },
   eth_sepolia: {
