@@ -1,14 +1,14 @@
 # Unitas Evm Contract
 
-## BSC_TESTNET
+## BSC_MAINNET
 
 ### 合约地址
 
 | 合约名称 | 地址 | 说明 |
 |---------|------|------|
-| USDu | [0xabFD3253fD009414b2911543880972d98F2Facd2](https://testnet.bscscan.com/address/0xabFD3253fD009414b2911543880972d98F2Facd2) | USDu 稳定币合约 |
-| UnitasMintingV2 | [0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03](https://testnet.bscscan.com/address/0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03) | 铸造和赎回合约 |
-| StakedUSDuV2 | [0xfaf2A0372742A305817f5a634cA8E1C75a3Cf3E1](https://testnet.bscscan.com/address/0xfaf2A0372742A305817f5a634cA8E1C75a3Cf3E1) | sUSDu 质押合约 |
+| USDu | [0xeA953eA6634d55dAC6697C436B1e81A679Db5882](https://bscscan.com/address/0xeA953eA6634d55dAC6697C436B1e81A679Db5882) | USDu 稳定币合约 |
+| UnitasMintingV2 | [0xbB984CE670100AA855f6152f88b26EE57f4EA82A](https://bscscan.com/address/0xbB984CE670100AA855f6152f88b26EE57f4EA82A) | 铸造和赎回合约 |
+| StakedUSDuV2 | [0x385C279445581a186a4182a5503094eBb652EC71](https://bscscan.com/address/0x385C279445581a186a4182a5503094eBb652EC71) | sUSDu 质押合约 |
 
 ### 配置信息
 
@@ -18,6 +18,33 @@
 |------|------|------|
 | WETH | [0xae13d989dac2f0debff460ac112a837c89baa7cd](https://testnet.bscscan.com/address/0xae13d989dac2f0debff460ac112a837c89baa7cd) | Wrap BNB |
 | USDT | [0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142](https://testnet.bscscan.com/address/0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142) | USDT 稳定币 |
+
+#### 每区块限额
+
+| 操作 | 限额 |
+|------|------|
+| 铸造 | 10,200,000 USDu |
+| 赎回 | 2,000,000 USDu |
+
+## BSC_TESTNET
+
+### 合约地址
+
+| 合约名称 | 地址 | 说明 |
+|---------|------|------|
+| USDu | [0x029544a6ef165c84A6E30862C85B996A2BF0f9dE](https://testnet.bscscan.com/address/0x029544a6ef165c84A6E30862C85B996A2BF0f9dE) | USDu 稳定币合约 |
+| UnitasMintingV2 | [0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648](https://testnet.bscscan.com/address/0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648) | 铸造和赎回合约 |
+| StakedUSDuV2 | [0x3E7fF623C4Db0128657567D583df71E0297dfcc3](https://testnet.bscscan.com/address/0x3E7fF623C4Db0128657567D583df71E0297dfcc3) | sUSDu 质押合约 |
+
+### 配置信息
+
+#### 支持的抵押资产
+
+| 代币 | 地址 | 说明 |
+|------|------|------|
+| WBNB | [0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c](https://bscscan.com/address/0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c) | Wrap BNB |
+| USDT | [0x55d398326f99059fF775485246999027B3197955](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) | USDT 稳定币 |
+| USDC | [0x55d398326f99059fF775485246999027B3197955](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) | USDC 稳定币 |
 
 #### 每区块限额
 
@@ -537,10 +564,10 @@ function mint(uint256 shares, address receiver) external returns (uint256 assets
 1.  **发起冷却**
     ```solidity
     // 根据资产数量发起冷却
-    function cooldownAssets(uint256 assets, address owner) external returns (uint256 shares)
+    function cooldownAssets(uint256 assets) external returns (uint256 shares)
 
     // 根据份额数量发起冷却
-    function cooldownShares(uint256 shares, address owner) external returns (uint256 assets)
+    function cooldownShares(uint256 shares) external returns (uint256 assets)
     ```
 
 2.  **执行提款**
