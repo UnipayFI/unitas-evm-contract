@@ -2,102 +2,108 @@
 
 ## BSC_MAINNET
 
-### 合约地址
+### Contract Addresses
 
-| 合约名称 | 地址 | 说明 |
-|---------|------|------|
-| USDu | [0xeA953eA6634d55dAC6697C436B1e81A679Db5882](https://bscscan.com/address/0xeA953eA6634d55dAC6697C436B1e81A679Db5882) | USDu 稳定币合约 |
-| UnitasMintingV2 | [0xbB984CE670100AA855f6152f88b26EE57f4EA82A](https://bscscan.com/address/0xbB984CE670100AA855f6152f88b26EE57f4EA82A) | 铸造和赎回合约 |
-| StakedUSDuV2 | [0x385C279445581a186a4182a5503094eBb652EC71](https://bscscan.com/address/0x385C279445581a186a4182a5503094eBb652EC71) | sUSDu 质押合约 |
+| Contract Name | Address | Description |
+|---|---|---|
+| USDu | [0xeA953eA6634d55dAC6697C436B1e81A679Db5882](https://bscscan.com/address/0xeA953eA6634d55dAC6697C436B1e81A679Db5882) | USDu Stablecoin Contract |
+| UnitasMintingV2 | [0xbB984CE670100AA855f6152f88b26EE57f4EA82A](https://bscscan.com/address/0xbB984CE670100AA855f6152f88b26EE57f4EA82A) | Minting and Redemption Contract |
+| StakedUSDuV2 | [0x385C279445581a186a4182a5503094eBb652EC71](https://bscscan.com/address/0x385C279445581a186a4182a5503094eBb652EC71) | sUSDu Staking Contract |
 
-### 配置信息
+### Configuration Information
 
-#### 支持的抵押资产
+#### Supported Collateral Assets
 
-| 代币 | 地址 | 说明 |
-|------|------|------|
-| WBNB | [0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c](https://bscscan.com/address/0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c) | Wrap BNB |
-| USDT | [0x55d398326f99059fF775485246999027B3197955](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) | USDT 稳定币 |
-| USDC | [0x55d398326f99059fF775485246999027B3197955](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) | USDC 稳定币 |
+| Token | Address | Description |
+|---|---|---|
+| WBNB | [0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c](https://bscscan.com/address/0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c) | Wrapped BNB |
+| USDT | [0x55d398326f99059fF775485246999027B3197955](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) | USDT Stablecoin |
+| USDC | [0x55d398326f99059fF775485246999027B3197955](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) | USDC Stablecoin |
 
 
-#### 每区块限额
+#### Per-Block Limits
 
-| 操作 | 限额 |
-|------|------|
-| 铸造 | 10,200,000 USDu |
-| 赎回 | 2,000,000 USDu |
+| Operation | Limit |
+|---|---|
+| Mint | 10,200,000 USDu |
+| Redeem | 2,000,000 USDu |
 
 ## BSC_TESTNET
 
-### 合约地址
+### Contract Addresses
 
-| 合约名称 | 地址 | 说明 |
-|---------|------|------|
-| USDu | [0x029544a6ef165c84A6E30862C85B996A2BF0f9dE](https://testnet.bscscan.com/address/0x029544a6ef165c84A6E30862C85B996A2BF0f9dE) | USDu 稳定币合约 |
-| UnitasMintingV2 | [0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648](https://testnet.bscscan.com/address/0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648) | 铸造和赎回合约 |
-| StakedUSDuV2 | [0x3E7fF623C4Db0128657567D583df71E0297dfcc3](https://testnet.bscscan.com/address/0x3E7fF623C4Db0128657567D583df71E0297dfcc3) | sUSDu 质押合约 |
+| Contract Name | Address | Description |
+|---|---|---|
+| USDu | [0x029544a6ef165c84A6E30862C85B996A2BF0f9dE](https://testnet.bscscan.com/address/0x029544a6ef165c84A6E30862C85B996A2BF0f9dE) | USDu Stablecoin Contract |
+| UnitasMintingV2 | [0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648](https://testnet.bscscan.com/address/0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648) | Minting and Redemption Contract |
+| StakedUSDuV2 | [0x3E7fF623C4Db0128657567D583df71E0297dfcc3](https://testnet.bscscan.com/address/0x3E7fF623C4Db0128657567D583df71E0297dfcc3) | sUSDu Staking Contract |
 
-### 配置信息
+### Configuration Information
 
-#### 支持的抵押资产
+#### Supported Collateral Assets
 
-| 代币 | 地址 | 说明 |
-|------|------|------|
-| WETH | [0xae13d989dac2f0debff460ac112a837c89baa7cd](https://testnet.bscscan.com/address/0xae13d989dac2f0debff460ac112a837c89baa7cd) | Wrap BNB |
-| USDT | [0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142](https://testnet.bscscan.com/address/0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142) | USDT 稳定币 |
+| Token | Address | Description |
+|---|---|---|
+| WETH | [0xae13d989dac2f0debff460ac112a837c89baa7cd](https://testnet.bscscan.com/address/0xae13d989dac2f0debff460ac112a837c89baa7cd) | Wrapped BNB |
+| USDT | [0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142](https://testnet.bscscan.com/address/0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142) | USDT Stablecoin |
 
-#### 每区块限额
+#### Per-Block Limits
 
-| 操作 | 限额 |
-|------|------|
-| 铸造 | 10,200,000 USDu |
-| 赎回 | 2,000,000 USDu |
+| Operation | Limit |
+|---|---|
+| Mint | 10,200,000 USDu |
+| Redeem | 2,000,000 USDu |
 
-### 权限地址
+### Permission Addresses
+
+#### USDu
+
+| Role / Target | Description | Address |
+|---|---|---|
+| `DEFAULT_ADMIN_ROLE` | Super admin, can set USDu Minter (must be set to UnitasMintingV2 contract after creation) | [0x8E3811B4Dc5022AB9C8Afbb54Be4Aa23780C62b3](https://app.safe.global/home?safe=bnb:0x8E3811B4Dc5022AB9C8Afbb54Be4Aa23780C62b3) |
 
 #### UnitasMintingV2
 
-| 角色 / 标的 | 说明 | 地址 |
-|-------------|------|------|
-| `DEFAULT_ADMIN_ROLE` | 管理全部角色、全局限额与资产配置的超级管理员 | _待补充_ |
-| `GATEKEEPER_ROLE` | 可在紧急情况下禁用铸造/赎回并移除操作角色 | _待补充_ |
-| `MINTER_ROLE` | 允许执行 `mint` / `mintWETH` 的操作账号 | _待补充_ |
-| `REDEEMER_ROLE` | 允许执行 `redeem` 的操作账号 | _待补充_ |
-| `COLLATERAL_MANAGER_ROLE` | 负责调用 `transferToCustody` 的资产托管账号 | _待补充_ |
-| Custodians | 已添加的托管钱包（`addCustodianAddress`） | _待补充_ |
-| Whitelisted Benefactors | `_whitelistedBenefactors` 白名单地址 | _待补充_ |
-| Approved Beneficiaries | 各 Benefactor 设置的受益人列表 | _待补充_ |
-| Delegated Signers | 经 `delegatedSigner` 授权的签名账号 | _待补充_ |
+| Role / Target | Description | Address |
+|---|---|---|
+| `DEFAULT_ADMIN_ROLE` | Super admin managing all roles, global limits, and asset configuration | [0x0a6Db8e8f0b79bA5B9f5AC7F5728843b830bB1c8](https://app.safe.global/home?safe=bnb:0x0a6Db8e8f0b79bA5B9f5AC7F5728843b830bB1c8) |
+| `GATEKEEPER_ROLE` | Can disable minting/redemption and remove operational roles in emergencies | [0x111B13fFf5fEa0C6F5f8108c6Faf2454e0BF906f](https://app.safe.global/home?safe=bnb:0x111B13fFf5fEa0C6F5f8108c6Faf2454e0BF906f) |
+| `MINTER_ROLE` | Account allowed to execute `mint` / `mintWETH` | [0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6](https://bscscan.com/address/0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6) |
+| `REDEEMER_ROLE` | Account allowed to execute `redeem` | [0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6](https://bscscan.com/address/0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6) |
+| `COLLATERAL_MANAGER_ROLE` | Asset custody account responsible for calling `transferToCustody` | [0x2A27ccff65A82dF27C4063e6EC6FBE0483065e18](https://app.safe.global/home?safe=bnb:0x2A27ccff65A82dF27C4063e6EC6FBE0483065e18) |
+| Custodians | Added custodian wallets (`addCustodianAddress`) | [0xB464C9890604926bd5Fa7b66Bf15d26BCD0eD3A9](https://app.safe.global/home?safe=bnb:0xB464C9890604926bd5Fa7b66Bf15d26BCD0eD3A9) |
+| Whitelisted Benefactors | `_whitelistedBenefactors` list | [0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6](https://bscscan.com/address/0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6) |
+| Approved Beneficiaries | Beneficiary lists set by each Benefactor | [0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6](https://bscscan.com/address/0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6) |
+| Delegated Signers | Signing accounts authorized via `delegatedSigner` | _TBD_ |
 
 #### StakedUSDu / StakedUSDuV2
 
-| 角色 / 标的 | 说明 | 地址 |
-|-------------|------|------|
-| `DEFAULT_ADMIN_ROLE` | 合约所有者，管理其他角色与关键参数 | _待补充_ |
-| `REWARDER_ROLE` | 负责调用 `transferInRewards` 分发奖励的账号 | _待补充_ |
-| `BLACKLIST_MANAGER_ROLE` | 可执行 `addToBlacklist` / `removeFromBlacklist` 的管控账号 | _待补充_ |
+| Role / Target | Description | Address |
+|---|---|---|
+| `DEFAULT_ADMIN_ROLE` | Contract owner, manages other roles and key parameters | [0x179650b38B20773393c3a10B3b55ba57780BDBD9](https://app.safe.global/home?safe=bnb:0x179650b38B20773393c3a10B3b55ba57780BDBD9) |
+| `REWARDER_ROLE` | Account responsible for calling `transferInRewards` to distribute rewards | [0xE59965162286D67308e2ebb6c34E0e18caEAA4F9](https://app.safe.global/home?safe=bnb:0xE59965162286D67308e2ebb6c34E0e18caEAA4F9) |
+| `BLACKLIST_MANAGER_ROLE` | Control account capable of executing `addToBlacklist` / `removeFromBlacklist` | [0xb3478DF92B7126a4f6Ea48Cde27e13c9F7AeB85E](https://app.safe.global/home?safe=bnb:0xb3478DF92B7126a4f6Ea48Cde27e13c9F7AeB85E) |
 
-## 主要合约
+## Core Contracts
 
 ### UnitasMinting
 
-UnitasMinting 合约负责 USDu 稳定币的铸造和赎回功能。
+The UnitasMinting contract is responsible for the minting and redemption of the USDu stablecoin.
 
-#### 角色和权限
+#### Roles and Permissions
 
-合约使用基于角色的访问控制：
+The contract uses role-based access control:
 
-- `MINTER_ROLE`: 可以调用 mint 方法的角色
-- `REDEEMER_ROLE`: 可以调用 redeem 方法的角色
-- `GATEKEEPER_ROLE`: 可以在紧急情况下禁用铸造和赎回功能，以及移除 minter 和 redeemer 角色的超级管理员
-- `DEFAULT_ADMIN_ROLE`: 可以管理其他角色的超级管理员
+- `MINTER_ROLE`: Role capable of calling the mint function
+- `REDEEMER_ROLE`: Role capable of calling the redeem function
+- `GATEKEEPER_ROLE`: Super admin capable of disabling minting and redemption functions in emergencies, and removing minter and redeemer roles
+- `DEFAULT_ADMIN_ROLE`: Super admin capable of managing other roles
 
-#### 主要方法
+#### Main Functions
 
 ##### mint
 
-铸造 USDu 稳定币。
+Mints USDu stablecoin.
 
 ```solidity
 function mint(
@@ -107,48 +113,48 @@ function mint(
 ) external
 ```
 
-参数说明：
+Parameter Description:
 
-1. `Order`: 订单信息
+1. `Order`: Order information
 ```solidity
 struct Order {
-    OrderType order_type;     // 必须为 OrderType.MINT (0)
-    uint256 expiry;          // 订单过期时间戳
-    uint256 nonce;           // 订单随机数，用于防重放
-    address benefactor;      // 支付抵押物的地址
-    address beneficiary;     // 接收 USDu 的地址
-    address collateral_asset; // 抵押物代币地址
-    uint256 collateral_amount; // 抵押物数量
-    uint256 usdu_amount;     // 要铸造的 USDu 数量
+    OrderType order_type;     // Must be OrderType.MINT (0)
+    uint256 expiry;          // Order expiry timestamp
+    uint256 nonce;           // Order nonce, used for replay protection
+    address benefactor;      // Address paying collateral
+    address beneficiary;     // Address receiving USDu
+    address collateral_asset; // Collateral token address
+    uint256 collateral_amount; // Collateral amount
+    uint256 usdu_amount;     // Amount of USDu to mint
 }
 ```
 
-2. `Route`: 抵押物分发路由
+2. `Route`: Collateral distribution route
 ```solidity
 struct Route {
-    address[] addresses;    // 托管地址数组
-    uint256[] ratios;      // 对应的比例数组，每个元素代表万分之几，总和必须等于 10000
+    address[] addresses;    // Array of custodian addresses
+    uint256[] ratios;      // Corresponding ratio array, each element represents basis points, sum must equal 10000
 }
 ```
 
-3. `Signature`: 签名信息
+3. `Signature`: Signature information
 ```solidity
 struct Signature {
-    SignatureType signature_type; // 必须为 SignatureType.EIP712 (0)
-    bytes signature_bytes;       // EIP712 签名数据
+    SignatureType signature_type; // Must be SignatureType.EIP712 (0)
+    bytes signature_bytes;       // EIP712 signature data
 }
 ```
 
-签名生成说明：
-1. 使用 EIP712 标准
+Signature Generation Description:
+1. Uses EIP712 standard
 
-2. Domain 参数:
+2. Domain Parameters:
    - name: "UnitasMinting"
    - version: "1"
-   - chainId: 当前链 ID
-   - verifyingContract: UnitasMinting 合约地址
+   - chainId: Current chain ID
+   - verifyingContract: UnitasMinting contract address
 
-3. Order 类型定义:
+3. Order Type Definition:
 
 ```solidity
 Order(uint8 order_type,uint256 expiry,uint256 nonce,address benefactor,address beneficiary,address collateral_asset,uint256 collateral_amount,uint256 usdu_amount)
@@ -156,7 +162,7 @@ Order(uint8 order_type,uint256 expiry,uint256 nonce,address benefactor,address b
 
 ##### redeem
 
-赎回 USDu 换回抵押物。
+Redeems USDu for collateral.
 
 ```solidity
 function redeem(
@@ -165,28 +171,28 @@ function redeem(
 ) external
 ```
 
-参数说明：
+Parameter Description:
 
-1. `Order`: 订单信息
+1. `Order`: Order information
 
 ```solidity
 struct Order {
-    OrderType order_type;     // 必须为 OrderType.REDEEM (1)
-    uint256 expiry;          // 订单过期时间戳
-    uint256 nonce;           // 订单随机数，用于防重放
-    address benefactor;      // 支付 USDu 的地址
-    address beneficiary;     // 接收抵押物的地址
-    address collateral_asset; // 要赎回的抵押物代币地址
-    uint256 collateral_amount; // 要赎回的抵押物数量
-    uint256 usdu_amount;     // 要销毁的 USDu 数量
+    OrderType order_type;     // Must be OrderType.REDEEM (1)
+    uint256 expiry;          // Order expiry timestamp
+    uint256 nonce;           // Order nonce, used for replay protection
+    address benefactor;      // Address paying USDu
+    address beneficiary;     // Address receiving collateral
+    address collateral_asset; // Collateral token address to redeem
+    uint256 collateral_amount; // Collateral amount to redeem
+    uint256 usdu_amount;     // Amount of USDu to burn
 }
 ```
 
-2. `Signature`: 签名信息，格式同 mint 方法
+2. `Signature`: Signature information, format same as mint function
 
-#### 管理方法
+#### Management Functions
 
-1. 资产管理
+1. Asset Management
 
 ```solidity
 function addSupportedAsset(address asset) external
@@ -194,30 +200,30 @@ function removeSupportedAsset(address asset) external
 function isSupportedAsset(address asset) external view returns (bool)
 ```
 
-2. 托管地址管理
+2. Custodian Address Management
 
 ```solidity
 function addCustodianAddress(address custodian) external
 function removeCustodianAddress(address custodian) external
 ```
 
-3. 限额管理
+3. Limit Management
 
 ```solidity
 function setMaxMintPerBlock(uint256 _maxMintPerBlock) external
 function setMaxRedeemPerBlock(uint256 _maxRedeemPerBlock) external
 ```
 
-4. 签名委托
+4. Signature Delegation
 
 ```solidity
 function setDelegatedSigner(address _delegateTo) external
 function removeDelegatedSigner(address _removedSigner) external
 ```
 
-#### 事件
+#### Events
 
-1. 铸造事件
+1. Mint Event
 
 ```solidity
 event Mint(
@@ -230,7 +236,7 @@ event Mint(
 );
 ```
 
-2. 赎回事件
+2. Redeem Event
 
 ```solidity
 event Redeem(
@@ -243,7 +249,7 @@ event Redeem(
 );
 ```
 
-3. 其他管理事件
+3. Other Management Events
 
 ```solidity
 event AssetAdded(address indexed asset);
@@ -256,45 +262,45 @@ event DelegatedSignerAdded(address indexed signer, address indexed delegator);
 event DelegatedSignerRemoved(address indexed signer, address indexed delegator);
 ```
 
-#### 错误码
+#### Error Codes
 
 ```solidity
-error Duplicate();                 // 订单重复
-error InvalidAddress();            // 地址无效
-error InvalidUSDuAddress();        // USDu 地址无效
-error InvalidZeroAddress();        // 零地址无效
-error InvalidAssetAddress();       // 资产地址无效
-error InvalidCustodianAddress();   // 托管地址无效
-error InvalidOrder();              // 订单无效
-error InvalidAmount();             // 金额无效
-error InvalidRoute();              // 路由无效
-error UnsupportedAsset();          // 不支持的资产
-error NoAssetsProvided();          // 未提供资产
-error InvalidSignature();          // 签名无效
-error InvalidNonce();              // nonce 无效
-error SignatureExpired();          // 签名过期
-error TransferFailed();            // 转账失败
-error MaxMintPerBlockExceeded();   // 超过每块最大铸造量
-error MaxRedeemPerBlockExceeded(); // 超过每块最大赎回量
+error Duplicate();                 // Duplicate order
+error InvalidAddress();            // Invalid address
+error InvalidUSDuAddress();        // Invalid USDu address
+error InvalidZeroAddress();        // Invalid zero address
+error InvalidAssetAddress();       // Invalid asset address
+error InvalidCustodianAddress();   // Invalid custodian address
+error InvalidOrder();              // Invalid order
+error InvalidAmount();             // Invalid amount
+error InvalidRoute();              // Invalid route
+error UnsupportedAsset();          // Unsupported asset
+error NoAssetsProvided();          // No assets provided
+error InvalidSignature();          // Invalid signature
+error InvalidNonce();              // Invalid nonce
+error SignatureExpired();          // Signature expired
+error TransferFailed();            // Transfer failed
+error MaxMintPerBlockExceeded();   // Exceeded max mint per block
+error MaxRedeemPerBlockExceeded(); // Exceeded max redeem per block
 ```
 
 ### UnitasMintingV2
 
-#### 角色和权限
+#### Roles and Permissions
 
-角色和权限与 V1 版本基本一致：
+Roles and permissions are consistent with V1:
 
-- `MINTER_ROLE`: 可以调用 mint 方法的角色
-- `REDEEMER_ROLE`: 可以调用 redeem 方法的角色
-- `GATEKEEPER_ROLE`: 可以在紧急情况下禁用铸造和赎回功能，以及移除 minter 和 redeemer 角色的超级管理员
-- `COLLATERAL_MANAGER_ROLE`: 可以将抵押品转移到托管钱包的角色
-- `DEFAULT_ADMIN_ROLE`: 可以管理其他角色的超级管理员
+- `MINTER_ROLE`: Role capable of calling the mint function
+- `REDEEMER_ROLE`: Role capable of calling the redeem function
+- `GATEKEEPER_ROLE`: Super admin capable of disabling minting and redemption functions in emergencies, and removing minter and redeemer roles
+- `COLLATERAL_MANAGER_ROLE`: Role capable of transferring collateral to custodian wallets
+- `DEFAULT_ADMIN_ROLE`: Super admin capable of managing other roles
 
-#### 主要方法
+#### Main Functions
 
 ##### mint
 
-铸造 USDu 稳定币。
+Mints USDu stablecoin.
 
 ```solidity
 function mint(
@@ -304,49 +310,49 @@ function mint(
 ) external
 ```
 
-参数说明：
+Parameter Description:
 
-1. `Order`: 订单信息
+1. `Order`: Order information
 ```solidity
 struct Order {
-    string order_id;          // 订单 ID
-    OrderType order_type;     // 必须为 OrderType.MINT (0)
-    uint120 expiry;          // 订单过期时间戳
-    uint128 nonce;           // 订单随机数，用于防重放
-    address benefactor;      // 支付抵押物的地址
-    address beneficiary;     // 接收 USDu 的地址
-    address collateral_asset; // 抵押物代币地址
-    uint128 collateral_amount; // 抵押物数量
-    uint128 usdu_amount;     // 要铸造的 USDu 数量
+    string order_id;          // Order ID
+    OrderType order_type;     // Must be OrderType.MINT (0)
+    uint120 expiry;          // Order expiry timestamp
+    uint128 nonce;           // Order nonce, used for replay protection
+    address benefactor;      // Address paying collateral
+    address beneficiary;     // Address receiving USDu
+    address collateral_asset; // Collateral token address
+    uint128 collateral_amount; // Collateral amount
+    uint128 usdu_amount;     // Amount of USDu to mint
 }
 ```
 
-2. `Route`: 抵押物分发路由
+2. `Route`: Collateral distribution route
 ```solidity
 struct Route {
-    address[] addresses;    // 托管地址数组
-    uint128[] ratios;      // 对应的比例数组，每个元素代表万分之几，总和必须等于 10000
+    address[] addresses;    // Array of custodian addresses
+    uint128[] ratios;      // Corresponding ratio array, each element represents basis points, sum must equal 10000
 }
 ```
 
-3. `Signature`: 签名信息
+3. `Signature`: Signature information
 ```solidity
 struct Signature {
-    SignatureType signature_type; // 可为 SignatureType.EIP712 (0) 或 SignatureType.EIP1271 (1)
-    bytes signature_bytes;       // 签名数据
+    SignatureType signature_type; // Can be SignatureType.EIP712 (0) or SignatureType.EIP1271 (1)
+    bytes signature_bytes;       // Signature data
 }
 ```
 
-签名生成说明：
-1. 使用 EIP712 标准
+Signature Generation Description:
+1. Uses EIP712 standard
 
-2. Domain 参数:
+2. Domain Parameters:
    - name: "UnitasMinting"
    - version: "1"
-   - chainId: 当前链 ID
-   - verifyingContract: UnitasMintingV2 合约地址
+   - chainId: Current chain ID
+   - verifyingContract: UnitasMintingV2 contract address
 
-3. Order 类型定义:
+3. Order Type Definition:
 
 ```solidity
 Order(string order_id,uint8 order_type,uint128 expiry,uint120 nonce,address benefactor,address beneficiary,address collateral_asset,uint128 collateral_amount,uint128 usdu_amount)
@@ -354,7 +360,7 @@ Order(string order_id,uint8 order_type,uint128 expiry,uint120 nonce,address bene
 
 ##### mintWETH
 
-使用 WETH 作为抵押物铸造 USDu。此方法会先将 WETH 兑换成 ETH，然后分发到托管地址。
+Mints USDu using WETH as collateral. This method first converts WETH to ETH, then distributes it to custodian addresses.
 
 ```solidity
 function mintWETH(
@@ -364,11 +370,11 @@ function mintWETH(
 ) external
 ```
 
-参数与 `mint` 方法相同，但 `collateral_asset` 必须是 WETH 地址。
+Parameters are the same as `mint` method, but `collateral_asset` must be the WETH address.
 
 ##### redeem
 
-赎回 USDu 换回抵押物。
+Redeems USDu for collateral.
 
 ```solidity
 function redeem(
@@ -377,29 +383,29 @@ function redeem(
 ) external
 ```
 
-参数说明：
+Parameter Description:
 
-1. `Order`: 订单信息
+1. `Order`: Order information
 
 ```solidity
 struct Order {
-    string order_id;          // 订单 ID
-    OrderType order_type;     // 必须为 OrderType.REDEEM (1)
-    uint120 expiry;          // 订单过期时间戳
-    uint128 nonce;           // 订单随机数，用于防重放
-    address benefactor;      // 支付 USDu 的地址
-    address beneficiary;     // 接收抵押物的地址
-    address collateral_asset; // 要赎回的抵押物代币地址
-    uint128 collateral_amount; // 要赎回的抵押物数量
-    uint128 usdu_amount;     // 要销毁的 USDu 数量
+    string order_id;          // Order ID
+    OrderType order_type;     // Must be OrderType.REDEEM (1)
+    uint120 expiry;          // Order expiry timestamp
+    uint128 nonce;           // Order nonce, used for replay protection
+    address benefactor;      // Address paying USDu
+    address beneficiary;     // Address receiving collateral
+    address collateral_asset; // Collateral token address to redeem
+    uint128 collateral_amount; // Collateral amount to redeem
+    uint128 usdu_amount;     // Amount of USDu to burn
 }
 ```
 
-2. `Signature`: 签名信息，格式同 mint 方法
+2. `Signature`: Signature information, format same as mint function
 
-#### 管理方法
+#### Management Functions
 
-1.  资产管理
+1.  Asset Management
 
     ```solidity
     function addSupportedAsset(address asset, TokenConfig calldata _tokenConfig) external;
@@ -408,7 +414,7 @@ struct Order {
     function setTokenType(address asset, TokenType tokenType) external;
     ```
 
-2.  托管地址管理
+2.  Custodian Address Management
 
     ```solidity
     function addCustodianAddress(address custodian) public;
@@ -417,7 +423,7 @@ struct Order {
     function transferToCustody(address wallet, address asset, uint128 amount) external;
     ```
 
-3.  限额管理
+3.  Limit Management
 
     ```solidity
     function setGlobalMaxMintPerBlock(uint128 _globalMaxMintPerBlock) external;
@@ -427,7 +433,7 @@ struct Order {
     function setStablesDeltaLimit(uint128 _stablesDeltaLimit) external;
     ```
 
-4.  签名委托
+4.  Signature Delegation
 
     ```solidity
     function setDelegatedSigner(address _delegateTo) external;
@@ -435,16 +441,16 @@ struct Order {
     function removeDelegatedSigner(address _removedSigner) external;
     ```
 
-5.  白名单管理
+5.  Whitelist Management
     ```solidity
     function addWhitelistedBenefactor(address benefactor) public;
     function removeWhitelistedBenefactor(address benefactor) external;
     function setApprovedBeneficiary(address beneficiary, bool status) public;
     ```
 
-#### 事件
+#### Events
 
-1.  铸造事件
+1.  Mint Event
 
     ```solidity
     event Mint(
@@ -458,7 +464,7 @@ struct Order {
     );
     ```
 
-2.  赎回事件
+2.  Redeem Event
 
     ```solidity
     event Redeem(
@@ -472,7 +478,7 @@ struct Order {
     );
     ```
 
-3.  其他管理事件
+3.  Other Management Events
 
     ```solidity
     event AssetAdded(address indexed asset);
@@ -493,7 +499,7 @@ struct Order {
     event TokenTypeSet(address indexed token, uint256 tokenType);
     ```
 
-#### 错误码
+#### Error Codes
 
 ```solidity
 error InvalidAddress();
@@ -527,106 +533,106 @@ error GlobalMaxRedeemPerBlockExceeded();
 
 ### StakedUSDu & StakedUSDuV2
 
-`StakedUSDu` 是一个基于 OpenZeppelin ERC4626 标准的金库合约，允许用户质押 USDu 来获取收益。`StakedUSDuV2` 在此基础上增加了提款冷却（Cooldown）机制。
+`StakedUSDu` is a vault contract based on the OpenZeppelin ERC4626 standard, allowing users to stake USDu to earn rewards. `StakedUSDuV2` adds a withdrawal Cooldown mechanism on top of this.
 
-#### 角色和权限
+#### Roles and Permissions
 
-- `REWARDER_ROLE`: 允许向合约中分发奖励的角色。
-- `BLACKLIST_MANAGER_ROLE`: 允许将地址加入黑名单或从中移除的角色。
-- `SOFT_RESTRICTED_STAKER_ROLE`: “软限制”角色，被添加的地址将无法进行质押（`deposit`）。
-- `FULL_RESTRICTED_STAKER_ROLE`: “完全限制”角色（黑名单），被添加的地址无法进行任何操作（质押、提款、转账）。
-- `DEFAULT_ADMIN_ROLE`: 超级管理员，可以管理以上角色以及合约的关键参数。
+- `REWARDER_ROLE`: Role allowed to distribute rewards to the contract.
+- `BLACKLIST_MANAGER_ROLE`: Role allowed to add addresses to or remove them from the blacklist.
+- `SOFT_RESTRICTED_STAKER_ROLE`: "Soft restricted" role; addresses added cannot stake (`deposit`).
+- `FULL_RESTRICTED_STAKER_ROLE`: "Fully restricted" role (blacklist); addresses added cannot perform any operations (stake, withdraw, transfer).
+- `DEFAULT_ADMIN_ROLE`: Super admin, can manage the above roles and key parameters of the contract.
 
-#### 主要方法
+#### Main Functions
 
-##### 质押流程
+##### Staking Process
 
-用户可以通过存入 `USDu` 来获取 `sUSDu` 份额。
+Users can obtain `sUSDu` shares by depositing `USDu`.
 
 ```solidity
-// 根据资产数量进行质押
+// Stake based on asset amount
 function deposit(uint256 assets, address receiver) external returns (uint256 shares)
 
-// 根据份额数量进行质押
+// Stake based on share amount
 function mint(uint256 shares, address receiver) external returns (uint256 assets)
 ```
 
-##### 提款流程
+##### Withdrawal Process
 
-提款流程分为两种模式，由 `StakedUSDuV2` 合约中的 `cooldownDuration` 参数决定。
+The withdrawal process is divided into two modes, determined by the `cooldownDuration` parameter in the `StakedUSDuV2` contract.
 
 
-**冷却提款 (V2 `cooldownDuration` > 0)**
+**Cooldown Withdrawal (V2 `cooldownDuration` > 0)**
 
-在此模式下，标准的 `withdraw` 和 `redeem` 方法会被禁用。用户必须先发起一个冷却请求，等待冷却期结束后才能最终取出资产。
+In this mode, standard `withdraw` and `redeem` methods are disabled. Users must first initiate a cooldown request and wait for the cooldown period to end before finally withdrawing assets.
 
-目前`cooldownDuration`为 7 天
+Currently `cooldownDuration` is 7 days.
 
-1.  **发起冷却**
+1.  **Initiate Cooldown**
     ```solidity
-    // 根据资产数量发起冷却
+    // Initiate cooldown based on asset amount
     function cooldownAssets(uint256 assets) external returns (uint256 shares)
 
-    // 根据份额数量发起冷却
+    // Initiate cooldown based on share amount
     function cooldownShares(uint256 shares) external returns (uint256 assets)
     ```
 
-2.  **执行提款**
-    等待 `cooldownDuration` 时间结束后，调用此方法以完成提款。
+2.  **Execute Withdrawal**
+    Wait for `cooldownDuration` time to end, then call this method to complete the withdrawal.
     ```solidity
     function unstake(address receiver) external
     ```
 
-##### 获取 Cooldown
+##### Get Cooldown
 
-查询用户`cooldown`信息
+Query user `cooldown` information
 
 ```solidity
 struct UserCooldown {
-  uint104 cooldownEnd; // 到期时间 
-  uint256 underlyingAmount; // 可领取数量
+  uint104 cooldownEnd; // Expiry time
+  uint256 underlyingAmount; // Claimable amount
 }
 
 function cooldowns(address owner) external view returns (UserCooldown memory userCooldown);
 ```
 
-##### 获取VestingAmount和UnvestedAmount
+##### Get VestingAmount and UnvestedAmount
 
 ```solidity
-/// 获取这个周期的vestingAmount
+/// Get the vestingAmount for this period
 function vestingAmount() external view returns (uint256);
 
-/// 获取这个周期还未解锁的奖励数量
+/// Get the amount of rewards not yet unlocked in this period
 function getUnvestedAmount() external view returns (uint256);
 ```
 
-#### 管理方法
+#### Management Functions
 
-1.  **黑名单管理** (`BLACKLIST_MANAGER_ROLE`)
+1.  **Blacklist Management** (`BLACKLIST_MANAGER_ROLE`)
     ```solidity
     function addToBlacklist(address target, bool isFullBlacklisting) external
     function removeFromBlacklist(address target, bool isFullBlacklisting) external
     ```
 
-2.  **奖励管理** (`REWARDER_ROLE`)
+2.  **Reward Management** (`REWARDER_ROLE`)
     ```solidity
     function transferInRewards(uint256 amount) external
     ```
 
-3.  **紧急情况** (`DEFAULT_ADMIN_ROLE`)
+3.  **Emergency Situations** (`DEFAULT_ADMIN_ROLE`)
     ```solidity
-    // 转移被完全拉黑地址的余额
+    // Redistribute balance of fully blacklisted addresses
     function redistributeLockedAmount(address from, address to) external
-    // 提取意外转入的非核心资产
+    // Recover accidentally transferred non-core assets
     function rescueTokens(address token, uint256 amount, address to) external
     ```
 
-4.  **V2 配置** (`DEFAULT_ADMIN_ROLE`)
+4.  **V2 Configuration** (`DEFAULT_ADMIN_ROLE`)
     ```solidity
     function setCooldownDuration(uint24 duration) external
     ```
 
-#### 事件
+#### Events
 
 ```solidity
 event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
@@ -637,7 +643,7 @@ event LockedAmountRedistributed(address indexed from, address indexed to, uint25
 event CooldownDurationUpdated(uint24 previousDuration, uint24 newDuration);
 ```
 
-#### 错误码
+#### Error Codes
 
 ```solidity
 error InvalidAmount();
@@ -652,4 +658,3 @@ error InvalidCooldown();
 error ExcessiveWithdrawAmount();
 error ExcessiveRedeemAmount();
 ```
-
