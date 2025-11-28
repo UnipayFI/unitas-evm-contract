@@ -15,8 +15,8 @@ contract UnitasMintingV2MockScript is Script {
   address beneficiary = 0x9F0cfD25ACe49057691948E4EAD7044CCc52d050;
   address collateral_asset = 0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142;
   MockToken collateral_token = MockToken(0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142);
-  IERC20 public usduToken = IERC20(0xabFD3253fD009414b2911543880972d98F2Facd2);
-  UnitasMintingV2 public UnitasMintingContract = UnitasMintingV2(payable(0x0A9133ab7BE00887D89F77d4aE3f999963DF4A03));
+  IERC20 public usduToken = IERC20(0x029544a6ef165c84A6E30862C85B996A2BF0f9dE);
+  UnitasMintingV2 public UnitasMintingContract = UnitasMintingV2(payable(0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648));
 
   uint256 benefactorPrivateKey;
   uint256 beneficiaryPrivateKey;
@@ -86,7 +86,7 @@ contract UnitasMintingV2MockScript is Script {
     )
   {
     order = IUnitasMintingV2.Order({
-      order_id: "10",
+      order_id: "2225",
       order_type: IUnitasMintingV2.OrderType.MINT,
       nonce: uint120(nonce),
       expiry: uint128(block.timestamp + 10 minutes),
@@ -117,16 +117,17 @@ contract UnitasMintingV2MockScript is Script {
   }
 
   function execute_mint() internal {
-    uint256 usduAmount = 1;
-    uint256 collateralAmount = 1;
-    uint256 nonce = 1747613582964;
+    uint256 usduAmount = 1000000000000000000;
+    uint256 collateralAmount = 1000000000000000000;
+    uint256 nonce = 1764119701226;
     (
       IUnitasMintingV2.Order memory mintOrder,
       IUnitasMintingV2.Signature memory takerSignature,
       IUnitasMintingV2.Route memory route
     ) = mint_setup(usduAmount, collateralAmount, nonce);
 
-    vm.startPrank(minter);
+    vm.startPrank(benefactor);
+    IERC20(mintOrder.collateral_asset).approve(address(UnitasMintingContract), collateralAmount);
     UnitasMintingContract.mint(mintOrder, route, takerSignature);
     vm.stopPrank();
   }
@@ -176,6 +177,6 @@ contract UnitasMintingV2MockScript is Script {
   }
 
   function run() public {
-    execute_redeem();
+    execute_mint();
   }
 }
