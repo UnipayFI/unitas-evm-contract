@@ -55,7 +55,23 @@ const config = {
         enabled: process.env.REPORT_GAS !== undefined,
         currency: "USD",
     },
-    etherscan: {},
+    etherscan: {
+        apiKey: {
+            bsc_testnet: process.env.BSCSCAN_API_KEY,
+            bsc_mainnet: process.env.BSCSCAN_API_KEY,
+            eth_sepolia: process.env.ETHERSCAN_API_KEY
+        },
+        customChains: [
+            {
+                network: "bsc_mainnet",
+                chainId: 56,
+                urls: {
+                    apiURL: "https://api.etherscan.io/v2/api?chainid=56",
+                    browserURL: "https://bscscan.com"
+                }
+            }
+        ]
+    },
     abiExporter: {
         runOnCompile: true,
     },
