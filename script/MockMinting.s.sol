@@ -180,3 +180,26 @@ contract UnitasMintingV2MockScript is Script {
     execute_mint();
   }
 }
+
+contract UnitasMintingV2SimulateScript is Script {
+  UnitasMintingV2 public UnitasMintingContract = UnitasMintingV2(payable(0xbB984CE670100AA855f6152f88b26EE57f4EA82A)); 
+  address internal admin = 0x0a6Db8e8f0b79bA5B9f5AC7F5728843b830bB1c8;
+
+  function setUp() public {
+    // forkId
+    uint256 forkId = vm.createFork(
+      "https://rpc.ankr.com/bsc/9c05cbd66971c4f4279faa4e285ac086cc93601060343afe4d8c27464fe18c8d"
+    );
+    vm.selectFork(forkId);
+  }
+
+  function simulateAddWhitelistedBenefactor() public {
+    vm.startPrank(admin);
+    UnitasMintingContract.addWhitelistedBenefactor(0x01444f55dD8D6B5ac61e0676B7C9476E52F069c6);
+    vm.stopPrank();
+  }
+
+  function run() public {
+    simulateAddWhitelistedBenefactor();
+  }
+}
