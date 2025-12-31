@@ -6,6 +6,7 @@ pragma solidity ^0.8.20;
 import "../UnitasMintingV2.utils.sol";
 import "../../../../contracts/StakedUSDuV2.sol";
 import "../../../../contracts/UnitasProxy.sol";
+import "../../../../contracts/interfaces/IUnitasProxy.sol";
 
 contract UnitasProxyTest is UnitasMintingV2Utils {
   StakedUSDuV2 internal staked;
@@ -15,7 +16,7 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
     super.setUp();
 
     staked = new StakedUSDuV2(IERC20(address(usduToken)), owner, owner);
-    proxy = new UnitasProxy(IUnitasMintingV2(address(UnitasMintingContract)), staked, IUSDu(address(usduToken)), owner);
+    proxy = new UnitasProxy(owner, address(usduToken), address(UnitasMintingContract), address(staked));
 
     vm.startPrank(owner);
     UnitasMintingContract.addWhitelistedBenefactor(address(proxy));
@@ -27,7 +28,11 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
   function test_isValidSignature_validSigner_returnsMagicValue() public view {
     bytes32 hash = keccak256("UnitasProxyTest");
-    IUnitasMintingV2.Signature memory signature = signOrder(trader1PrivateKey, hash, IUnitasMintingV2.SignatureType.EIP1271);
+    IUnitasMintingV2.Signature memory signature = signOrder(
+      trader1PrivateKey,
+      hash,
+      IUnitasMintingV2.SignatureType.EIP1271
+    );
 
     bytes4 magic = bytes4(keccak256("isValidSignature(bytes32,bytes)"));
     assertEq(proxy.isValidSignature(hash, signature.signature_bytes), magic);
@@ -35,7 +40,11 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
   function test_isValidSignature_invalidSigner_returnsInvalid() public view {
     bytes32 hash = keccak256("UnitasProxyTest");
-    IUnitasMintingV2.Signature memory signature = signOrder(trader2PrivateKey, hash, IUnitasMintingV2.SignatureType.EIP1271);
+    IUnitasMintingV2.Signature memory signature = signOrder(
+      trader2PrivateKey,
+      hash,
+      IUnitasMintingV2.SignatureType.EIP1271
+    );
 
     assertEq(proxy.isValidSignature(hash, signature.signature_bytes), bytes4(0xffffffff));
   }
@@ -78,7 +87,7 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
       abi.encodeCall(IERC20.transferFrom, (address(proxy), custodian1, uint256(_stETHToDeposit)))
     );
     vm.prank(minter);
-    uint256 shares = proxy.mintAndStake(order, route, takerSignature, stakeReceiver);
+    uint256 shares = proxy.mintAndStake(stakeReceiver, order, route, takerSignature);
 
     assertEq(stETHToken.balanceOf(custodian1), _stETHToDeposit);
     assertEq(usduToken.balanceOf(address(proxy)), 0);
@@ -115,7 +124,7 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
     vm.expectRevert();
     vm.prank(trader2);
-    proxy.mintAndStake(order, route, takerSignature, trader2);
+    proxy.mintAndStake(trader2, order, route, takerSignature);
   }
 
   function test_mintAndStake_revert_whenInvalidSignatureType() public {
@@ -144,9 +153,9 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
       IUnitasMintingV2.SignatureType.EIP712
     );
 
-    vm.expectRevert(UnitasProxy.InvalidSignatureType.selector);
+    vm.expectRevert(IUnitasProxy.InvalidSignatureType.selector);
     vm.prank(minter);
-    proxy.mintAndStake(order, route, takerSignature, trader2);
+    proxy.mintAndStake(trader2, order, route, takerSignature);
   }
 
   function test_mintAndStake_revert_whenInvalidBenefactor() public {
@@ -175,9 +184,9 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
       IUnitasMintingV2.SignatureType.EIP1271
     );
 
-    vm.expectRevert(UnitasProxy.InvalidBenefactor.selector);
+    vm.expectRevert(IUnitasProxy.InvalidBenefactor.selector);
     vm.prank(minter);
-    proxy.mintAndStake(order, route, takerSignature, trader2);
+    proxy.mintAndStake(trader2, order, route, takerSignature);
   }
 
   function test_mintAndStake_revert_whenInvalidBeneficiary() public {
@@ -206,9 +215,9 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
       IUnitasMintingV2.SignatureType.EIP1271
     );
 
-    vm.expectRevert(UnitasProxy.InvalidBeneficiary.selector);
+    vm.expectRevert(IUnitasProxy.InvalidBeneficiary.selector);
     vm.prank(minter);
-    proxy.mintAndStake(order, route, takerSignature, trader2);
+    proxy.mintAndStake(trader2, order, route, takerSignature);
   }
 
   function test_approveCollateral_and_rescueERC20_onlyAdmin() public {

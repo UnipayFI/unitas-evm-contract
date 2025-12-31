@@ -182,7 +182,7 @@ contract UnitasMintingV2MockScript is Script {
 }
 
 contract UnitasMintingV2SimulateScript is Script {
-  UnitasMintingV2 public UnitasMintingContract = UnitasMintingV2(payable(0xbB984CE670100AA855f6152f88b26EE57f4EA82A)); 
+  UnitasMintingV2 public UnitasMintingContract = UnitasMintingV2(payable(0xbB984CE670100AA855f6152f88b26EE57f4EA82A));
   address internal admin = 0x0a6Db8e8f0b79bA5B9f5AC7F5728843b830bB1c8;
 
   function setUp() public {
