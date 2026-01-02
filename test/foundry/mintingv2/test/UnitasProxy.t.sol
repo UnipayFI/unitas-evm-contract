@@ -70,7 +70,8 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
     ratios[0] = 10_000;
     IUnitasMintingV2.Route memory route = IUnitasMintingV2.Route({ addresses: targets, ratios: ratios });
 
-    stETHToken.mint(_stETHToDeposit, address(proxy));
+    vm.prank(benefactor);
+    stETHToken.approve(address(proxy), _stETHToDeposit);
 
     vm.prank(owner);
     proxy.approveCollateral(address(stETHToken), _stETHToDeposit);
@@ -84,10 +85,19 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
     vm.expectCall(
       address(stETHToken),
+      abi.encodeCall(IERC20.transferFrom, (benefactor, address(proxy), uint256(_stETHToDeposit)))
+    );
+    vm.expectCall(
+      address(stETHToken),
       abi.encodeCall(IERC20.transferFrom, (address(proxy), custodian1, uint256(_stETHToDeposit)))
     );
+    vm.expectCall(address(usduToken), abi.encodeCall(IERC20.approve, (address(staked), uint256(0))));
+    vm.expectCall(
+      address(usduToken),
+      abi.encodeCall(IERC20.approve, (address(staked), uint256(_usduToMint)))
+    );
     vm.prank(minter);
-    uint256 shares = proxy.mintAndStake(stakeReceiver, order, route, takerSignature);
+    uint256 shares = proxy.mintAndStake(benefactor, stakeReceiver, order, route, takerSignature);
 
     assertEq(stETHToken.balanceOf(custodian1), _stETHToDeposit);
     assertEq(usduToken.balanceOf(address(proxy)), 0);
@@ -124,7 +134,7 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
     vm.expectRevert();
     vm.prank(trader2);
-    proxy.mintAndStake(trader2, order, route, takerSignature);
+    proxy.mintAndStake(benefactor, trader2, order, route, takerSignature);
   }
 
   function test_mintAndStake_revert_whenInvalidSignatureType() public {
@@ -155,7 +165,7 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
     vm.expectRevert(IUnitasProxy.InvalidSignatureType.selector);
     vm.prank(minter);
-    proxy.mintAndStake(trader2, order, route, takerSignature);
+    proxy.mintAndStake(benefactor, trader2, order, route, takerSignature);
   }
 
   function test_mintAndStake_revert_whenInvalidBenefactor() public {
@@ -186,7 +196,7 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
     vm.expectRevert(IUnitasProxy.InvalidBenefactor.selector);
     vm.prank(minter);
-    proxy.mintAndStake(trader2, order, route, takerSignature);
+    proxy.mintAndStake(benefactor, trader2, order, route, takerSignature);
   }
 
   function test_mintAndStake_revert_whenInvalidBeneficiary() public {
@@ -217,7 +227,7 @@ contract UnitasProxyTest is UnitasMintingV2Utils {
 
     vm.expectRevert(IUnitasProxy.InvalidBeneficiary.selector);
     vm.prank(minter);
-    proxy.mintAndStake(trader2, order, route, takerSignature);
+    proxy.mintAndStake(benefactor, trader2, order, route, takerSignature);
   }
 
   function test_approveCollateral_and_rescueERC20_onlyAdmin() public {

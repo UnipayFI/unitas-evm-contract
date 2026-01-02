@@ -27,6 +27,7 @@ interface IUnitasProxy {
   function rescueERC20(address token, address to, uint256 amount) external;
 
   function mintAndStake(
+    address benefactor,
     address beneficiary,
     IUnitasMintingV2.Order calldata order,
     IUnitasMintingV2.Route calldata route,

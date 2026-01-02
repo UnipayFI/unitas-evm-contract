@@ -79,6 +79,7 @@ contract UnitasProxy is IUnitasProxy, IERC1271, SingleAdminAccessControl, Reentr
   }
 
   function mintAndStake(
+    address benefactor,
     address beneficiary,
     IUnitasMintingV2.Order calldata order,
     IUnitasMintingV2.Route calldata route,
@@ -97,6 +98,10 @@ contract UnitasProxy is IUnitasProxy, IERC1271, SingleAdminAccessControl, Reentr
       revert InvalidBeneficiary();
     }
 
+    // Transfer collateral asset from benefactor to this contract
+    // Make sure benefactor approve to proxy contract
+    IERC20(order.collateral_asset).safeTransferFrom(benefactor, address(this), order.collateral_amount);
+    
     uint256 amount = uint256(order.usdu_amount);
 
     minting.mint(order, route, signature);
