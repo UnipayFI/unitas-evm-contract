@@ -10,13 +10,13 @@ import "../contracts/UnitasProxy.sol";
 import "../contracts/mock/MockToken.sol";
 
 contract UnitasProxyMockScript is Script {
-  address benefactor = 0x2523B3377C0cb9A01c49CA352f972749405F9ABC;
-  address beneficiary = 0x2523B3377C0cb9A01c49CA352f972749405F9ABC;
+  address benefactor = 0xA01b173F7D4BD77F9735D120598A6944e72C22BF;
+  address beneficiary = 0xA01b173F7D4BD77F9735D120598A6944e72C22BF;
   address collateral_asset = 0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142;
   MockToken collateral_token = MockToken(0x42e3D7f4cfE3B94BCeF3EBaEa832326AcB40C142);
   IERC20 public usduToken = IERC20(0x029544a6ef165c84A6E30862C85B996A2BF0f9dE);
   UnitasMintingV2 public UnitasMintingContract = UnitasMintingV2(payable(0x84E5D5009ab4EE5eCf42eeA5f1B950d39eEFb648));
-  UnitasProxy public UnitasProxyCoontract = UnitasProxy(payable(0x2523B3377C0cb9A01c49CA352f972749405F9ABC));
+  UnitasProxy public UnitasProxyCoontract = UnitasProxy(payable(0xA01b173F7D4BD77F9735D120598A6944e72C22BF));
   uint256 executorPrivateKey;
   address executor = 0x943c07A603173A62826118a0051a796c8DbA24A7;
 

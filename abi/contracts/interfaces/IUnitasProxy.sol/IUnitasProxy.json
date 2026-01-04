@@ -11,12 +11,32 @@
   },
   {
     "inputs": [],
+    "name": "InvalidPenaltyRate",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidSignatureType",
     "type": "error"
   },
   {
     "inputs": [],
+    "name": "InvalidStakedState",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidZeroAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidZeroAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoStakedSupply",
     "type": "error"
   },
   {
@@ -80,6 +100,37 @@
       }
     ],
     "name": "ERC20Rescued",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "susduAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "usduAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "penaltyUsduAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FlashWithdraw",
     "type": "event"
   },
   {
@@ -196,6 +247,44 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "oldMultiSigWallet",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newMultiSigWallet",
+        "type": "address"
+      }
+    ],
+    "name": "MultiSigWalletUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldRate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newRate",
+        "type": "uint256"
+      }
+    ],
+    "name": "PenaltyRateSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "benefactor",
         "type": "address"
       },
@@ -294,6 +383,19 @@
       }
     ],
     "name": "approveCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "susduAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "flashWithdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
