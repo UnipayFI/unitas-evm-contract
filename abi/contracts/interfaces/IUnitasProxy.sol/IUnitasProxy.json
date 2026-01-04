@@ -88,6 +88,12 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "benefactor",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "beneficiary",
         "type": "address"
       },
@@ -182,6 +188,96 @@
       }
     ],
     "name": "MintAndStake",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "benefactor",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "beneficiary",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "order_id",
+            "type": "string"
+          },
+          {
+            "internalType": "enum IUnitasMintingV2.OrderType",
+            "name": "order_type",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint128",
+            "name": "expiry",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint120",
+            "name": "nonce",
+            "type": "uint120"
+          },
+          {
+            "internalType": "address",
+            "name": "benefactor",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "beneficiary",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateral_asset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint128",
+            "name": "collateral_amount",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint128",
+            "name": "usdu_amount",
+            "type": "uint128"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IUnitasMintingV2.Order",
+        "name": "order",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "enum IUnitasMintingV2.SignatureType",
+            "name": "signature_type",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes",
+            "name": "signature_bytes",
+            "type": "bytes"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IUnitasMintingV2.Signature",
+        "name": "signature",
+        "type": "tuple"
+      }
+    ],
+    "name": "RedeemAndWithdraw",
     "type": "event"
   },
   {
@@ -306,6 +402,99 @@
       {
         "internalType": "uint256",
         "name": "shares",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "benefactor",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "beneficiary",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "order_id",
+            "type": "string"
+          },
+          {
+            "internalType": "enum IUnitasMintingV2.OrderType",
+            "name": "order_type",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint128",
+            "name": "expiry",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint120",
+            "name": "nonce",
+            "type": "uint120"
+          },
+          {
+            "internalType": "address",
+            "name": "benefactor",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "beneficiary",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateral_asset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint128",
+            "name": "collateral_amount",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint128",
+            "name": "usdu_amount",
+            "type": "uint128"
+          }
+        ],
+        "internalType": "struct IUnitasMintingV2.Order",
+        "name": "order",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "enum IUnitasMintingV2.SignatureType",
+            "name": "signature_type",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes",
+            "name": "signature_bytes",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IUnitasMintingV2.Signature",
+        "name": "signature",
+        "type": "tuple"
+      }
+    ],
+    "name": "redeemAndWithdraw",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "asset",
         "type": "uint256"
       }
     ],
