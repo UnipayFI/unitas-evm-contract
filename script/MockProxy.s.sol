@@ -129,7 +129,46 @@ contract UnitasProxyMockScript is Script {
     vm.stopPrank();
   }
 
+  function redeem_setup(
+    uint256 usduAmount,
+    uint256 collateralAmount,
+    uint256 nonce
+  ) public returns (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) {
+    //redeem
+    redeemOrder = IUnitasMintingV2.Order({
+      order_type: IUnitasMintingV2.OrderType.REDEEM,
+      order_id: generateRandomOrderId(),
+      expiry: uint128(block.timestamp + 10 minutes),
+      nonce: uint120(nonce + 1),
+      benefactor: beneficiary,
+      beneficiary: beneficiary,
+      collateral_asset: address(collateral_asset),
+      usdu_amount: uint128(usduAmount),
+      collateral_amount: uint128(collateralAmount)
+    });
+
+    bytes32 digest3 = UnitasMintingContract.hashOrder(redeemOrder);
+    takerSignature2 = signOrder(executorPrivateKey, digest3, IUnitasMintingV2.SignatureType.EIP1271);
+    vm.stopPrank();
+  }
+
+  function execute_redeem() internal {
+    uint256 usduAmount = 1000000000000000000;
+    uint256 collateralAmount = 1000000000000000000;
+    uint256 nonce = 1747613382967;
+    (IUnitasMintingV2.Order memory redeemOrder, IUnitasMintingV2.Signature memory takerSignature2) = redeem_setup(
+      usduAmount,
+      collateralAmount,
+      nonce
+    );
+
+    vm.startPrank(executor);
+    usduToken.approve(address(UnitasProxyCoontract), usduAmount);
+    UnitasProxyCoontract.redeemAndWithdraw(executor, executor, redeemOrder, takerSignature2);
+    vm.stopPrank();
+  }
+
   function run() public {
-    execute_mint();
+    execute_redeem();
   }
 }
